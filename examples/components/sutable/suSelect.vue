@@ -39,6 +39,11 @@ export default {
     },
     beforeDestroy(){
         window.removeEventListener('click',this.hideMenban)
+
+        for(var sd in this.data){
+            this.data[sd]=null
+        }
+
     },
     computed:{
       /*  activeName(){

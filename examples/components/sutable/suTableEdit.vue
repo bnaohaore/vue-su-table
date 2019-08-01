@@ -191,6 +191,11 @@ export default {
             this.showNextEdit();
         }
     },
+    beforeDestroy(){
+        for(var sd in this.data){
+            this.data[sd]=null
+        }
+    },
     watch: {
         'inputValue'(val){
             this.$emit('editValueChange',{value:val,col:this.col,row:this.row})

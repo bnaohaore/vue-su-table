@@ -22,6 +22,7 @@
                 default: () => []
             }
         },
+
         created(){
 
         },
@@ -40,19 +41,20 @@
 
                   <thead>
                     <tr >
+
                       {
                      this.headerData.map((arr,index)=>{
                         return  this.isfixed ?
-                            (arr.fixed ? <th  title={arr.label} data-col={index} on-mouseenter={()=>this.get_su_header_th('fixed')}  on-mousedown={()=>this.border_downclick('fixed')} on-mousemove={this.headerMouseMove} on-mouseout={this.headerMouseOut} >
+                            (arr.fixed ? <th style={{height:this.$parent.suHeaderHeight+'px'}}  title={arr.label} data-col={index} on-mouseenter={()=>this.get_su_header_th('fixed')}  on-mousedown={()=>this.border_downclick('fixed')} on-mousemove={this.headerMouseMove} on-mouseout={this.headerMouseOut} >
                             {
-                                arr.$scopedSlots.hasOwnProperty('header') ? arr.$scopedSlots.header() :  arr.label
+                                arr.$scopedSlots.hasOwnProperty('header') ? arr.$scopedSlots.header()  : arr.type=='checkbox' ? <su-checkbox  types="header"  indeterminate={this.$parent.isIndeterminate}  v-model={this.$parent.suChecked}></su-checkbox> : arr.label
                             }
                             </th> : '') :
-                            <th class="su-header-th" title={arr.label} data-col={index} on-mouseenter={this.get_su_header_th}  on-mousedown={this.border_downclick} on-mousemove={this.headerMouseMove}  on-mouseout={this.headerMouseOut}>
+                            (<th class="su-header-th" title={arr.label} data-col={index} on-mouseenter={this.get_su_header_th}  on-mousedown={this.border_downclick} on-mousemove={this.headerMouseMove}  on-mouseout={this.headerMouseOut}>
                             {
-                                arr.$scopedSlots.hasOwnProperty('header') ? arr.$scopedSlots.header() :  arr.label
+                                arr.$scopedSlots.hasOwnProperty('header') ? arr.$scopedSlots.header() :   arr.type=='checkbox' ? <su-checkbox  types="header"  indeterminate={this.$parent.isIndeterminate}  v-model={this.$parent.suChecked}></su-checkbox> :  arr.label
                             }
-                            </th>
+                            </th>)
                       })
                       }
                     </tr>
@@ -64,9 +66,15 @@
             window.addEventListener('mouseup',this.border_upclick)
         },
         beforeDestroy(){
-            window.removeEventListener('mouseup',this.border_upclick)
+            window.removeEventListener('mouseup',this.border_upclick);
+            for(var sd in this.data){
+                this.data[sd]=null
+            }
         },
         methods: {
+           /* checked_change(val){
+                this.$parent.set_val_all(val);
+            },*/
             //鼠标按下
             border_downclick(types=''){
                 this.$parent.set_durg_from(types);
@@ -135,7 +143,9 @@
                 }
             }
         },
-        watch: {},
+        watch: {
+
+        },
         components: {}
     }
 

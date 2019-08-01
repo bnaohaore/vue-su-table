@@ -1,8 +1,6 @@
-import Alert from './src/main';
-
-/* istanbul ignore next */
-Alert.install = function(Vue) {
-  Vue.component(Alert.name, Alert);
+import suOption from './suOption.vue';
+suOption.install = function(Vue) {
+  Vue.component(suOption.name, suOption);
 };
-
-export default Alert;
+console.log(suOption)
+export default suOption;

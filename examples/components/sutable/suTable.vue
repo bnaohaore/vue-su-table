@@ -69,6 +69,10 @@
         },
         beforeDestroy(){
 
+            for(var sd in this.data){
+                this.data[sd]=null
+            }
+
             window.removeEventListener('resize',this.set_init)
         },
         methods: {

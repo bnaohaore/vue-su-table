@@ -72,6 +72,11 @@ import thottles from './thottles'
                     this.$parent.set_mousmoveindex(index);
             }
         },
+        beforeDestroy(){
+            for(var sd in this.data){
+                this.data[sd]=null
+            }
+        },
         watch: {},
         components: {
 

@@ -5,7 +5,11 @@
             this.customRender = this.$options.render;
             this.$options.render = h => h('div', this.$slots.default);
         },
-
+        beforeDestroy(){
+            for(var sd in this.data){
+                this.data[sd]=null
+            }
+        },
         mounted(){
             this.$parent.set_headerdata({
                 $scopedSlots:this.$scopedSlots,

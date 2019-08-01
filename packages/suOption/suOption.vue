@@ -1,6 +1,6 @@
 
 <template>
-    <div @click="set_active"  class="suOptionOut" @mouseenter="set_hover_index_val" :class="{suOptionOut_active : isactive,active_hovers: $parent.$parent.hover_index_val==this.value}">
+    <div @click.stop="set_active"  class="suOptionOut" @mouseenter="set_hover_index_val" :class="{suOptionOut_active : isactive,active_hovers: $parent.$parent.hover_index_val==this.value}">
         {{label}}
     </div>
 </template>
@@ -21,7 +21,10 @@ export default {
     mounted(){
         if(this.$parent.$parent.value==this.value){
             this.isactive=true;
-            this.$parent.$parent.set_text(this.label)
+         /*   console.log(this.$parent.$parent.value);
+            console.log(this.label);
+            console.log(this.value)*/
+          //  this.$parent.$parent.set_text(this.label)
         }else {
             this.isactive=false;
         }
@@ -35,6 +38,7 @@ export default {
             this.$parent.$parent.set_hover_index_val(this.value)
         },
         set_active(){
+            console.log('点击22')
             this.$parent.$parent.set_active(this.value,this.label)
         },
     },
@@ -47,6 +51,11 @@ export default {
             }else {
                 this.isactive=false;
             }
+        }
+    },
+    beforeDestroy(){
+        for(var sd in this.data){
+            this.data[sd]=null
         }
     },
     components: {

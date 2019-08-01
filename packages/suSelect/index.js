@@ -1,5 +1,5 @@
-import suPopover from './suPopover';
-suPopover.install = function(Vue) {
-  Vue.component(suPopover.name, suPopover);
+import suSelect from './suSelect.vue';
+suSelect.install = function(Vue) {
+  Vue.component(suSelect.name, suSelect);
 };
-export default suPopover;
+export default suSelect;

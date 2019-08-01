@@ -16,13 +16,13 @@ import thottles from './thottles'
         created(){
 
         },
+        beforeDestroy(){
+            for(var sd in this.data){
+                this.data[sd]=null
+            }
+        },
         mounted(){
-            //如果是浮动table不执行
-           /* if(this.isfixed){return}*/
-            //初始化添加headerdata
-           /* this.$children.map(arr=>{
-                this.$parent.set_headerdata({...arr.$props,$scopedSlots:arr.$scopedSlots.hasOwnProperty('header') ? arr.$scopedSlots.header() : null });
-            });*/
+
         },
 
         render(h){
@@ -37,20 +37,21 @@ import thottles from './thottles'
                 <tbody>
                     {
                         this.$parent.tableData.map((arrrow,rowindex)=>{
-                            arrrow.$index=rowindex; //设置行标识
+                        // arrrow.$index=rowindex; //设置行标识
                          return   (<tr data-index={rowindex} on-mouseleave={()=>this.$parent.set_mousmoveindex(null)} on-mouseenter={()=>this.tr_mousmove(rowindex)}  class={{'su_hover_tr':rowindex==this.$parent.mousmoveindex}}>{
                              this.$parent.headerData.map((arr,colindex)=>{
                              return this.isfixed ?
                                  ( arr.fixed ?
                                          arr.$scopedSlots.hasOwnProperty('default') ?
                                          <td>
-                                             { arr.$scopedSlots.default({row:arrrow,$rowIndex:rowindex,$colIndex:colindex})   }
+                                             { arr.$scopedSlots.default({row:arrrow,$rowIndex: rowindex,$colIndex:colindex})   }
                                          </td> :
+                                          arr.type=='checkbox' ? <td><su-checkbox row={rowindex} types="column"  v-model={arrrow['suChecked']}></su-checkbox></td> :
                                           <td title={ arrrow[arr.prop]}>
                                               <span>{  arrrow[arr.prop]  }</span>
                                          </td> : ''
                                  ) :
-                                 arr.fixed ? <td></td> : arr.$scopedSlots.hasOwnProperty('default') ? <td >{ arr.$scopedSlots.default({row:arrrow,$rowIndex:rowindex,$colIndex:colindex}) }</td> : <td title={ arrrow[arr.prop]}><span>{ arrrow[arr.prop]  }</span></td>
+                                 arr.fixed ? <td></td> : arr.type=='checkbox' ? <td><su-checkbox row={rowindex} types="column"  v-model={arrrow['suChecked']}></su-checkbox></td> : arr.$scopedSlots.hasOwnProperty('default') ? <td >{ arr.$scopedSlots.default({row:arrrow,$rowIndex: rowindex,$colIndex:colindex}) }</td> : <td title={ arrrow[arr.prop]}><span>{ arrrow[arr.prop]  }</span></td>
                          })}
                          </tr>)
                         })
@@ -59,10 +60,8 @@ import thottles from './thottles'
             </table>)
         },
         methods: {
-            get_edit(row=null,col=null){
-               /* if(row>=this.$parent.tableData.length-1 && col>=this.$parent.headerData.length-1){
-                    return 'over'
-                }*/
+            get_edit(row=null,col=null,types=''){
+                if(row<0 || col <0){return false}
                 return this.$children.find(arr=>{
                     return arr.row==row && arr.col == col
                 })

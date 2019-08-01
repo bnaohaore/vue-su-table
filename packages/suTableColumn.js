@@ -5,17 +5,31 @@
             this.customRender = this.$options.render;
             this.$options.render = h => h('div', this.$slots.default);
         },
-
+        beforeDestroy(){
+            for(var sd in this.data){
+                this.data[sd]=null
+            }
+        },
         mounted(){
             this.$parent.set_headerdata({
                 $scopedSlots:this.$scopedSlots,
                 fixed:this.fixed,
                 width:this.width,
                 prop:this.prop,
-                label:this.label
+                label:this.label,
+                type:this.type
             });
+          /*  if(this.type=='checkbox'){
+                this.$parent.
+            }*/
+
         },
         props:{
+            //默认空 checkbox为开启复选框
+            type:{
+                default: '',
+                type:String
+            },
             //浮动标识
             fixed:{
                 default: false,

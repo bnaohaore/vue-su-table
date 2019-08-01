@@ -331,7 +331,11 @@ exports.default = {
       default: 'fade-in-linear'
     }
   },
-
+  beforeDestroy(){
+      for(var sd in this.data){
+          this.data[sd]=null
+      }
+  },
   computed: {
     tooltipId: function tooltipId() {
       return 'el-popover-' + (0, _util.generateId)();

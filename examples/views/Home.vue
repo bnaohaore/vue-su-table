@@ -1,14 +1,73 @@
 <template>
-  <div class="home" style="height: 100%;display: flex;flex-direction: column;overflow: hidden">
+  <div class="home" style="max-width: 100%">
+      <div style="text-align: left;padding: 30px">
+          ctrl+小键盘左键退格 tab键进格
+          <p style="color: red;margin-bottom: 20px">修改下拉 或者 初始化下拉数据的值的时候 必须 同时给 到或者拥有 code 和 str(编号和名称) 必须要求后端给到  <br>如：this.$refs.suTableSyncFef.setData(0,{sucai:'3',sucaiStr:'菠菜头头'});</p>
+          <p style="color: red;margin-bottom: 20px">修改行数据请使用setData方法 <br>如: 修改第一行的数据 this.$refs.suTableSyncFef.setData(0,{suChecked:true}</p>
+          <p style="color: red;margin-bottom: 20px">增删操作必须使用 push unshift splice 等 原生方法 </p>
+          <p style="color: red;margin-bottom: 20px">
+              使第一行勾选
+              <br>如: this.$refs.suTableSyncFef.setData(0,{suChecked:true}
+              <br> 获取勾选状态的数据请  循环 判断 suChecked 为 true 的
+          </p>
+          <p style="margin-bottom: 20px">组件 su-table-sync 用于开启大量数据渲染模式 具体使用见示例</p>
+          <p style="margin-bottom: 20px">
+              组件 su-table-menban 用于编写自定义下拉弹窗 具体使用见示例
+          </p>
+          <p style="margin-bottom: 20px">
+              组件 su-table 用于渲染表格
+              <br>
+              方法 lastEntry 最后一行切换后执行
+          </p>
+          <p>
+              组件 su-table-column 用于渲染列
+              <br>
+              参数  :fixed="true" (设置当前列浮动)  type='checkbox'  (设置列为复选框列)  label='名字'(表头文字) prop="name"(字段名)
+              <br>
+              template (自定义列内容详情见示列)     template  slot="header"(自定义表头内容)
+          </p>
+          <p>
+              组件 su-table-edit 用td编辑
+              <br>
+              参数 layer="select" (单选下拉)  layer="selectSrarch"(搜索下拉)  layer="input"(普通input输入)  layer="auto"(自定义内容下拉弹窗)
+              type="date"(日期选择 和 layer="input"同时使用生效)  type="time"(时间选择 和 layer="input"同时使用生效) :col="scope.$colIndex"(必填) :row="scope.$rowIndex"(必填)
+              :dflabel.sync(用于layer="selectSrarch" layer="select"绑定默认中文)
+              select_label
+              select_value
+              <br>
+              方法
+              @autoKeyup (layer="auto" 自定义弹窗打开同时 按键盘 触发)
+              @confirm (enter键触发 选中下拉时触发)
+              @editValueChange(input框输入时触发)
+              @selectSearch(layer="selectSrarch" input框输入时触发 打开时会默认触发一次)
+          </p>
+      </div>
     <button @click="addata">新增尾行并选中</button>
     <button @click="addataf">新增首行并选中</button>
-    <div style="flex:1;overflow: hidden;margin: 60px;">
+    <button @click="remove_select">删除选中行</button>
+    <button @click="changesddshucai">修改下拉值</button>
+    <div style="height: 500px;overflow: hidden;margin: 10px;">
       <su-table-sync ref="suTableSyncFef" :tableData.sync="su_tableData">
         <template slot-scope="scope">
-          <su-table :tableData="scope.data" @lastEntry="lastEntry">
-            <su-table-column :fixed="true">
+            <su-table-menban ref="menban1">
+                    <su-table  :tableData="menban_table">
+                        <su-table-column  label='名字的' prop="name"></su-table-column>
+                        <su-table-column  label='自定义弹层' prop="name"></su-table-column>
+                        <su-table-column  label='自定义弹层' prop="name"></su-table-column>
+                        <su-table-column  label='岁数' prop="old"></su-table-column>
+                        <su-table-column  label='名称3' prop="sucaiStr"></su-table-column>
+                    </su-table>
+            </su-table-menban>
+            <su-table ref="suTableRef" :tableData="scope.data" @lastEntry="lastEntry">
+            <su-table-column  type='checkbox' :fixed="true"></su-table-column>
+            <su-table-column  label='自定义弹层'>
+                <template slot-scope="scope">
+                    <su-table-edit :autoRef="$refs.menban1" @autoKeyup="autoKeyup"  :col="scope.$colIndex" :row="scope.$rowIndex" layer="auto" v-model="scope.row.orderText" ></su-table-edit>
+                </template>
+            </su-table-column>
+            <su-table-column >
               <!--自定义头部-->
-              <template slot-scope="scope" slot="header" >
+              <template slot-scope="scope"  slot="header">
                 <div>
                   <div>自定义头部+自定义内容</div>
                   <div style="display: flex;width: 100%"><div  style="flex:1;">姓名</div><div  style="flex:1;">年龄</div></div>
@@ -19,26 +78,23 @@
                 <div style="display: flex;width: 100%"><div style="flex:1;">{{scope.row.old}}{{scope.row.name}}</div><div  style="flex:1;">{{scope.row.year}}</div></div>
               </template>
             </su-table-column>
-            <su-table-column prop='$copyIndex' :fixed="true" label='序号'>
-            </su-table-column>
-            <su-table-column :fixed="true"  label='普通input'>
+            <su-table-column  label='普通input' >
               <template slot-scope="scope">
-                <su-table-edit @editValueChange="valuechangefn" :col="scope.$colIndex" :row="scope.$rowIndex" layer="input" v-model="scope.row.name" ></su-table-edit>
+                <su-table-edit @confirm="inputConfirm" @editValueChange="inputchanges" :col="scope.$colIndex" :row="scope.$rowIndex" layer="input" v-model="scope.row.name" ></su-table-edit>
               </template>
             </su-table-column>
-            <su-table-column :width="200" :fixed="true"  prop="old" label='年月日'>
-              <template slot-scope="scope">
-                <su-table-edit :col="scope.$colIndex" :row="scope.$rowIndex" type="date" layer="input"  v-model="scope.row.date" ></su-table-edit>
-              </template>
+            <su-table-column prop='$copyIndex'  label='序号'>
             </su-table-column>
-            <su-table-column prop="year" label='时间'>
+         <!--   <su-table-column  label='普通input'>
               <template slot-scope="scope">
-                <su-table-edit :col="scope.$colIndex" :row="scope.$rowIndex" layer="input" type="time" v-model="scope.row.time" ></su-table-edit>
+                <su-table-edit @confirm="inputConfirm" @editValueChange="valuechangefn" :col="scope.$colIndex" :row="scope.$rowIndex" layer="input" v-model="scope.row.name" ></su-table-edit>
               </template>
-            </su-table-column>
+            </su-table-column>-->
             <su-table-column  label='单选下拉'>
               <template slot-scope="scope">
                 <su-table-edit
+                        @confirm="selectConfirm"
+                        @editValueChange="valuechangefn"
                         :col="scope.$colIndex" :row="scope.$rowIndex"
                         layer="select"
                         :dflabel.sync="scope.row.sucaiStr"
@@ -49,35 +105,69 @@
                 </su-table-edit>
               </template>
             </su-table-column>
-
-            <su-table-column  label='职业'>
-
+            <su-table-column  label='筛选下拉'>
+              <template slot-scope="scope">
+                <su-table-edit
+                        @confirm="selectSearchConfirm"
+                        @editValueChange="valuechangefn"
+                        :col="scope.$colIndex" :row="scope.$rowIndex"
+                        layer="selectSearch"
+                        @selectSearch="selectSearch_selectSearch"
+                        :dflabel.sync="scope.row.sucai2Str"
+                        select_label="label"
+                        select_value="value"
+                        :selectData="selectSearchDatatwo"
+                        v-model="scope.row.sucai2">
+                </su-table-edit>
+              </template>
             </su-table-column>
-            <su-table-column  label='职业'>
-
+        <!--    <su-table-column  label='自定义下拉'>
+              <template slot-scope="scope">
+                <su-table-edit
+                        :col="scope.$colIndex" :row="scope.$rowIndex"
+                        layer="selectSearch"
+                        select_label="label"
+                        select_value="value"
+                        :selectData="selectSearchDatatwo"
+                        v-model="scope.row.sucai2">
+                </su-table-edit>
+              </template>
+            </su-table-column>-->
+            <su-table-column :width="200"   prop="old" label='年月日'>
+              <template slot-scope="scope">
+                <su-table-edit :col="scope.$colIndex" :row="scope.$rowIndex" type="date" layer="input"  v-model="scope.row.date" ></su-table-edit>
+              </template>
             </su-table-column>
-            <su-table-column prop="year" label='时间2'>
+            <su-table-column prop="year" label='时间'>
               <template slot-scope="scope">
                 <su-table-edit :col="scope.$colIndex" :row="scope.$rowIndex" layer="input" type="time" v-model="scope.row.time" ></su-table-edit>
               </template>
             </su-table-column>
+
+
+            <su-table-column  label='职业'>
+
+            </su-table-column>
+
+            <su-table-column  label='静态展示' prop="name"></su-table-column>
           </su-table>
         </template>
       </su-table-sync>
     </div>
-    <div style="height: 150px;overflow-y: auto">
       <!--{{su_tableData}}-->
-    </div>
-
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
 
+
+
 export default {
+
     data(){
       return {
+          su_menban_1:false,
           actives:'1',
           selectData:[
               {value:'1',label:'白菜'},
@@ -89,43 +179,160 @@ export default {
               {value:'7',label:'白菜4'},
               {value:'8',label:'花菜5'},
               {value:'9',label:'菠菜头sdfsdfsfdsfsdf头6'},
-
           ],
-          su_tableData:[
-
+          selectSearchData:[
+              {value:'51',label:'51白菜'},
+              {value:'52',label:'52花菜'},
+              {value:'53',label:'53菠菜头头'},
+              {value:'54',label:'54西蓝花1'},
+              {value:'55',label:'55户罗布2'},
+              {value:'56',label:'56青椒3'},
+              {value:'57',label:'57冰块4'},
+              {value:'58',label:'58黄瓜5'},
+              {value:'59',label:'59油条大油条大大的油条'},
+          ],
+          selectSearchDatatwo:[],
+          su_tableData:[{name:'莞',old:'213',index:11111,sucai2:'57',sucai2Str:'57冰块4',sucai:'2',sucaiStr:'花菜',date:'2011-11-11',time:'15:10',orderText:'123'}],
+          menban_table:[
+              {name:'莞',old:'213',index:1,sucai2:'57',sucai2Str:'57冰块4',sucai:'2',sucaiStr:'花菜',date:'2011-11-11',time:'15:10'},
+              {name:'莞',old:'213',index:2,sucai2:'57',sucai2Str:'57冰块4',sucai:'2',sucaiStr:'花菜',date:'2011-11-11',time:'15:10'},
+              {name:'莞',old:'213',index:1,sucai2:'57',sucai2Str:'57冰块4',sucai:'2',sucaiStr:'花菜',date:'2011-11-11',time:'15:10'},
+              {name:'莞',old:'213',index:1,sucai2:'57',sucai2Str:'57冰块4',sucai:'2',sucaiStr:'花菜',date:'2011-11-11',time:'15:10'},
+              {name:'莞',old:'213',index:1,sucai2:'57',sucai2Str:'57冰块4',sucai:'2',sucaiStr:'花菜',date:'2011-11-11',time:'15:10'},
+              {name:'莞',old:'213',index:1,sucai2:'57',sucai2Str:'57冰块4',sucai:'2',sucaiStr:'花菜',date:'2011-11-11',time:'15:10'},
+              {name:'莞',old:'213',index:1,sucai2:'57',sucai2Str:'57冰块4',sucai:'2',sucaiStr:'花菜',date:'2011-11-11',time:'15:10'},
+              {name:'莞',old:'213',index:1,sucai2:'57',sucai2Str:'57冰块4',sucai:'2',sucaiStr:'花菜',date:'2011-11-11',time:'15:10'},
+              {name:'莞',old:'213',index:1,sucai2:'57',sucai2Str:'57冰块4',sucai:'2',sucaiStr:'花菜',date:'2011-11-11',time:'15:10'},
+              {name:'莞',old:'213',index:1,sucai2:'57',sucai2Str:'57冰块4',sucai:'2',sucaiStr:'花菜',date:'2011-11-11',time:'15:10'},
+              {name:'莞',old:'213',index:1,sucai2:'57',sucai2Str:'57冰块4',sucai:'2',sucaiStr:'花菜',date:'2011-11-11',time:'15:10'},
+              {name:'莞',old:'213',index:1,sucai2:'57',sucai2Str:'57冰块4',sucai:'2',sucaiStr:'花菜',date:'2011-11-11',time:'15:10'},
               ]
       }
   },
   name: 'home',
   mounted(){
       for(var lsd=0;lsd<10000;lsd++){
-          this.su_tableData.push({name:'莞',old:'213',index:lsd,sucai:'2',sucaiStr:'花菜',date:'2011-11-11',time:'15:10'})
+        //  this.su_tableData.push({name:'莞',old:'213',index:lsd,sucai2:'57',sucai2Str:'57冰块4',sucai:'2',sucaiStr:'花菜',date:'2011-11-11',time:'15:10',orderText:'123'})
+        //  this.su_tableData.push({checked:true})
       }
+
+
+       //在表格初始化完毕后 修改第1 5 15行选中状态为true
+    /*  this.$refs.suTableSyncFef.init_end(()=>{
+          this.$refs.suTableSyncFef.setData(0,{suChecked:true});
+          this.$refs.suTableSyncFef.setData(5,{suChecked:true});
+          this.$refs.suTableSyncFef.setData(15,{suChecked:true});
+      });*/
   },
   methods:{
+      //自定义弹层 任意按键操作后触发 用于控制弹层  调用next进入下一格
+      autoKeyup(data,next){
+          console.log(data);
+          this.$refs.suTableSyncFef.setData(data.row,{orderText:data.value});
+          if(data.keyCode=='13'){
+              next()
+          }
+          if(data.keyCode=='9'){
+              next()
+          }
+      },
+      //修改第一行的下拉值
+      changesddshucai(){
+          this.$refs.suTableSyncFef.setData(0,{sucai:'3',sucaiStr:'菠菜头头'});
+      },
+      //删除选中行
+      remove_select(){
+          console.log(this.su_tableData)
+
+          for(var mmp=this.su_tableData.length-1;mmp>=0;mmp--){
+              if(this.su_tableData[mmp].suChecked){
+                  this.su_tableData.splice(mmp,1)
+              }
+          }
+          console.log(this.su_tableData)
+
+          /*    if(arr.suChecked){
+                  this.su_tableData.splice(index,1)
+              }*/
+
+          //splice
+      },
+      //新增一行到首行
       addataf(){
           this.su_tableData.unshift({});
           this.$nextTick(()=>{
               this.$refs.suTableSyncFef.showEdit(0,0)  // 选中 第一行 第一个
           })
       },
+      //新增一行到最后
       addata(){
           this.su_tableData.push({});
           this.$nextTick(()=>{
               this.$refs.suTableSyncFef.showEdit(this.su_tableData.length-1,0)  // 选中 最后一行 第1个
           })
       },
-      //最后一行切换自动添加一行
+      //可选函数 最后一行切换自动添加一行
       lastEntry(val){
+          console.log('执行最后');
           this.su_tableData.push({});
           this.$nextTick(()=>{
               this.$refs.suTableSyncFef.showEdit(this.su_tableData.length-1,0)  // 选中 最后一行 第1个
           })
       },
-      //值改变触发
+      //可选函数 值改变触发
       valuechangefn(data){
           console.log(data)
-      }
+      },
+      //input输入的同时赋值
+      inputchanges(val){
+          this.$refs.suTableSyncFef.setData(val.row,{name:val.value});
+      },
+      //搜索下拉 提交触发
+      selectSearchConfirm(val,next){
+          //需要手动赋值
+          this.$refs.suTableSyncFef.setData(val.row,{sucai2:val.value,sucai2Str:val.label});
+          //调用next 跳转到下一格
+          next()
+      },
+      //搜索下拉 搜索时触发  默认节流防抖200毫秒
+      selectSearch_selectSearch(val,update){
+        console.log(val);
+          //从后台获得数据 然后赋值
+          setTimeout(()=>{
+              let filt= this.selectSearchData.filter((arr,index)=>{
+                  return   JSON.stringify(arr).indexOf(val)!=-1
+              });
+              this.selectSearchDatatwo=filt;
+          },1000)
+
+      },
+      //可选函数  对单元格赋值时触发
+      selectConfirm(val,next){
+          console.log(val); //{row: 12, col: 2, value: "莞123123", label: ""}
+          //在此添加拦截
+          if(val.label=='白菜'){
+              this.$refs.suTableRef.showPopover('白菜不能选请换一个！！','red');
+              return
+          }
+          this.$refs.suTableRef.showPopover('你选择了 '+val.label);
+          //需要手动赋值
+          this.$refs.suTableSyncFef.setData(val.row,{sucai:val.value,sucaiStr:val.label});
+
+          //调用next 跳转到下一格
+           next()
+      },
+      inputConfirm(val,next){
+          console.log(val); //{row: 12, col: 2, value: "莞123123", label: ""}
+          if(typeof parseInt(val.value) == 'number' && parseInt(val.value)<999){
+              this.$refs.suTableRef.showPopover('数字不能小于999','green');
+              return
+          }
+          this.$refs.suTableRef.showPopover('你按了enter','red');
+          //需要手动赋值
+          this.$refs.suTableSyncFef.setData(val.row,{name:val.value});
+          //调用next 跳转到下一格
+          next()
+      },
   }
 }
 </script>

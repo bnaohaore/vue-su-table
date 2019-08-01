@@ -37,11 +37,13 @@ export default {
         )
     },
     mounted(){
-
         /*;*/
         this.$nextTick(()=>{
+            console.log(this.$children)
+            console.log(123)
             this.$on('updateEnd',this.updateEndFn);
             this.tableBody=this.$children[0].$el.querySelector('.su-table-out-bodys');
+
             this.$refs.scrolland.addEventListener('scroll',this.setTableData,false);
             window.addEventListener('resize',this.init,false);
             this.tableBody.addEventListener('mousewheel',this.set_bodyscroll,false);
@@ -52,7 +54,13 @@ export default {
        // this.datas.push(this.tableData[0])
     },
     beforeDestroy(){
-
+        this.$off('updateEnd',this.updateEndFn);
+        this.$refs.scrolland.removeEventListener('scroll',this.setTableData);
+        window.removeEventListener('resize',this.init,false);
+        this.tableBody.removeEventListener('mousewheel',this.set_bodyscroll,false);
+        for(var sd in this.data){
+            this.data[sd]=null
+        }
     },
     methods: {
         //反写外部参数

@@ -15,6 +15,11 @@ export default {
     created(){
 
     },
+    beforeDestroy(){
+        for(var sd in this.data){
+            this.data[sd]=null
+        }
+    },
     computed:{
 
     },

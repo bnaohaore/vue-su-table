@@ -7,7 +7,7 @@
         <!--header-->
         <template v-if="showbody">
             <div class="su-table-out-header" ref="suHeaderFef" style="display: flex;flex-direction: row;background: #cbdbe1;" >
-                <su-table-header    :style="{transform:'translateX('+-bodyleft+'px)',width:bodyWidth+'px'}" ref="headerOut" :headerData="headerData"></su-table-header><div style="height: 100%;background: #cbdbe1;flex:1;"></div>
+                <su-table-header :style="{transform:'translateX('+-bodyleft+'px)',width:bodyWidth+'px'}" ref="headerOut" :headerData="headerData"></su-table-header><div style="height: 100%;background: #cbdbe1;flex:1;"></div>
             </div>
             <div v-if="headerData[0].fixed" class="su-table-out-header-fixed-right" :class="{bodysleft1:bodyleft!=0}" :style="{width:leftFixedWidth+'px'}" style="display: flex;flex-direction: row;overflow: hidden">
                 <su-table-header :isfixed="true" :style="{width:bodyWidth+'px'}" style="flex:1"  :headerData="headerData"></su-table-header><!--<div style="height: 100%;background: #cbdbe1;" :style="{width:scrollWidth+'px'}"></div>-->
@@ -23,6 +23,11 @@
                 <su-table-body :isfixed="true" ref="tablebody_fixed_ref" @mousemove.native="bodymousemove" :style="{transform:'translateY('+-bodytop+'px)',width:bodyWidth+'px'}"></su-table-body>
             </div>
         </template>
+        <su-popover v-model="showHidePopover"  ref="showHidePopover">
+            <div class="su-table-popover-cont-class" ref='su_popover_cont_ref'>
+                {{showHidePopover_cont}}
+            </div>
+        </su-popover>
     </div>
 </template>
 <script>
@@ -30,17 +35,24 @@
     import suTableBody from './suTableBody.js'
     import thottles from './thottles'
     let thottles_scroll=new thottles();
+    let thottles_popover=new thottles();
+    let thottles_checked_init=new thottles();
     export default {
         name:'suTable',
         data() {
             return {
+                initCheckedisld:true, //拦截
+                isIndeterminate:false,
+                suChecked:false,
+
+                showHidePopover_cont:'',
+                showHidePopover:false,
                 isEditRef:null,
                 sync:false,
                 xx_data:{
                     left:0,
                     show:false,
                 },  //控制虚线
-
                 showbody:false,
                 mousmoveindex:null, //鼠标移入高亮行
                 suHeaderHeight:0, //表头高度
@@ -68,42 +80,144 @@
             window.addEventListener('resize',this.set_init,false);
         },
         beforeDestroy(){
-
-            window.removeEventListener('resize',this.set_init)
+            window.removeEventListener('resize',this.set_init);
+            for(var sd in this.data){
+                this.data[sd]=null
+            }
         },
         methods: {
+            set_val_all(vals){
+                this.initCheckedisld=false;
+                if(this.$parent.$options.name=='suTableSync'){
+                    this.$parent.tableData.forEach((val,index)=>{
+                        if(vals){
+                            this.$parent.tableData[index].suChecked=true
+                        }
+                        if(!vals){
+                            this.$parent.tableData[index].suChecked=false
+                        }
+                    });
+                }
+                this.tableData.forEach((arr,ind)=>{
+                    if(vals){
+                        this.tableData[ind].suChecked=true
+                    }
+                    if(!vals){
+                        this.tableData[ind].suChecked=false
+                    }
+                });
+                this.isIndeterminate=false;
+                this.$nextTick(()=>{
+                    this.initCheckedisld=true;
+                });
+            },
+            set_checked(index,val){
+              //  if(!this.initCheckedisld){return}
+                if(this.$parent.$options.name=='suTableSync'){
+
+                    this.$parent.tableData[this.$parent.datas[index].$copyIndex].suChecked=val;
+                    this.initChecked();
+                }
+            },
+            //初始化表头checked
+            initChecked(){
+                thottles_checked_init.timeEnd(()=>{
+                    let have_select=false;
+                    let have_noselect=false;
+                    if(this.$parent.$options.name=='suTableSync'){
+                            this.$parent.tableData.forEach(val=>{
+                                if(val.suChecked){
+                                    have_select=true
+                                }
+                                if(!val.suChecked){
+                                    have_noselect=true
+                                }
+                            })
+                    }
+                    if(have_select && have_noselect){
+                        this.isIndeterminate=true;
+                        return
+                    }
+                    if(have_select && !have_noselect){
+                        this.isIndeterminate=false;
+                        this.suChecked=true;
+                        return
+                    }
+                    if(!have_select && have_noselect){
+                        this.isIndeterminate=false;
+                        this.suChecked=false;
+                        return
+                    }
+                },100)
+            },
+            showPopover(cont='',color='black'){
+                //自动关闭
+                thottles_popover.timeEnd(()=>{
+                    this.showHidePopover=false
+                },3000);
+                if(this.showHidePopover){
+                    this.showHidePopover=false
+                }
+                this.$refs.showHidePopover.referenceElm=this.isEditRef.$el;
+                this.$nextTick(()=>{
+                    this.showHidePopover_cont=cont;
+                    this.$refs.su_popover_cont_ref.style.color=color;
+                    this.$refs.showHidePopover.doDestroy();
+                    this.showHidePopover=true
+                });
+               // console.log(this.$refs.showHidePopover);
+            },
             setEdit(edit){
                 this.isEditRef=edit;
             },
-            getNextEdit(row,col){
+            set_scroll_left(edit){
+                if(this.headerData[0].fixed){
+                    setTimeout(()=>{
+                        let hidex= (this.leftFixedWidth+this.$refs.tableout.getBoundingClientRect().x)-edit.getBoundingClientRect().x;
+                        if(hidex>0){
+                            this.$refs.bodyoutref.scrollLeft=this.$refs.bodyoutref.scrollLeft-hidex
+                        }
+                    },100)
+                }
+            },
+            getNextEdit(row,col,types){
+                //console.log(row);
                 let maxCol=this.headerData.length-1;
                 let cols=col == maxCol ? 0 : parseFloat(col+1);
                 let rows=col == maxCol ? parseFloat(row+1) : row;
+                if(types=='to_pre'){
+                     cols=col == 0 ? maxCol : parseFloat(col-1);
+                     rows=col == 0 ?  parseFloat(row-1) : row ;
+                }
+
                 let editfixed=null;
                 let edit=null;
-
-                    editfixed=this.$refs.tablebody_fixed_ref.get_edit(rows,cols);
-
-                    edit=this.$refs.tablebody_ref.get_edit(rows,cols);
-
-
-
+                    edit=this.$refs.tablebody_ref.get_edit(rows,cols,types);
+                if(!edit){
+                    editfixed=this.$refs.tablebody_fixed_ref ? this.$refs.tablebody_fixed_ref.get_edit(rows,cols,types) : null;
+                }
                 if(edit || editfixed){
-                    let mmt=edit || editfixed;
 
-                    if(mmt && !mmt.$parent.isfixed){
-                       let hidex= (this.leftFixedWidth+this.$refs.tableout.getBoundingClientRect().x)-mmt.$el.getBoundingClientRect().x;
-                       if(hidex>0){
-                           this.$refs.bodyoutref.scrollLeft=this.$refs.bodyoutref.scrollLeft-hidex
-                       }
-                    };
+                   /* if(mmt && !mmt.$parent.isfixed){
+                        setTimeout(()=>{
+                            let hidex= (this.leftFixedWidth+this.$refs.tableout.getBoundingClientRect().x)-mmt.$el.getBoundingClientRect().x;
+                            console.log(hidex);
+                            if(hidex>0){
+                                this.$refs.bodyoutref.scrollLeft=this.$refs.bodyoutref.scrollLeft-hidex
+                            }
+                            },100);
+                    };*/
                     return edit || editfixed
                 } else {
                     if(rows>this.tableData.length-1){
-                        console.log('终止查找 已到最后一个');
+                      // console.log('终止查找 已到最后一个');
                         return false
                     }
-                    return    this.getNextEdit(rows,cols);
+                    if(rows<0 || cols <0){
+                         console.log('终止查找 已到最后一个111');
+                        return false
+                    }
+                    return    this.getNextEdit(rows,cols,types);
                 };
                 //  return  this.$parent.get_edit(this.row,this.col);
             },
@@ -131,7 +245,7 @@
             },
             //获取所有可编辑格
             get_editArrs(){
-                console.log(this)
+
             },
             //滚轮 js控制表格滚动
             fixed_set_body_scroll(){
@@ -157,6 +271,23 @@
               //  this.$refs.headerOut.$el.setAttribute('style','transform: translateX(-20px);-webkit-transform: translateX(-20px)')
             },
             set_headerdata(data){
+              /*if(  data.type=='checkbox'){
+                  console.log(this.tableData)
+                  this.tableData.forEach((arr,index)=>{
+                      if(!arr.hasOwnProperty('checked')){
+                          this.tableData[index].checked=''
+                      }
+                  });
+                  if(this.$parent.$options.name=='suTableSync'){
+
+                      this.$parent.tableData.forEach((arr,index)=>{
+                          if(!arr.hasOwnProperty('checked')){
+                              console.log(index);
+                              this.$parent.tableData[index].checked=''
+                          }
+                      })
+                  }
+              }*/
                 this.headerData.push(data)
             },
             //设置初始化数据
@@ -174,11 +305,10 @@
             if(this.$parent.$options.name=='suTableSync'){
                 this.sync=true
             }
-            console.log(this.headerData);
             this.$nextTick(()=>{
                 this.set_init();
+                this.initChecked();
             });
-
         },
         computed:{
             //设置浮动表格宽度
@@ -201,11 +331,17 @@
                 this.headerData.forEach((arr)=>{
                     allwidth+=arr.width
                 });
-                console.log(allwidth);
                 return  allwidth
             } //表格body宽度
         },
-        watch: {},
+        watch: {
+            'tableData.length'(){
+                this.$nextTick(()=>{
+                    this.initChecked();
+                });
+                console.log(333)
+            }
+        },
         components: {
             suTableHeader,
             suTableBody
@@ -214,6 +350,89 @@
 </script>
 
 <style lang="scss">
+    .su-popover {
+        position: absolute;
+        background: #fff;
+        border-radius: 4px;
+        border: 1px solid #ebeef5;
+        z-index: 2000;
+        color: #606266;
+        line-height: 1.4;
+        text-align: justify;
+        font-size: 14px;
+        box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+        word-break: break-all;
+    }
+    .su-popover{
+        ::-webkit-scrollbar{
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track-piece {
+            background-color: #eaeaea;
+            -webkit-border-radius: 0;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #d8d8d8;
+            height: 50px;
+            outline-offset: -2px;
+            outline: 2px solid #fff;
+            -webkit-border-radius: 5px;
+            border: 0px solid #fff;
+        }
+        .active_hovers{
+            background: #00c081 !important;
+            color: white !important;
+        }
+    }
+    .suSelectOut{
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        background: white;
+        // border: 1px solid #dee9eb;
+        //  border-radius: 4px;
+        box-sizing: border-box;
+        height: 24px;
+        font-size: 14px;
+
+        .rotate180{
+            transform:rotate(180deg);
+        }
+    }
+    .suSelectMenban{
+
+        .suOptionOut_active{
+            background: #dee9eb;
+        }
+        .suOptionOut{
+            cursor: pointer;
+            padding:2px 12px;
+            height: 24px;
+            box-sizing: border-box;
+            text-align: center;
+            line-height: 22px;
+            font-size: 14px;
+            white-space:nowrap;
+        }
+        padding: 6px;
+        box-sizing: border-box;
+        background: white;
+        z-index: 998;
+        display: inline-block;
+        max-height: 180px;
+        overflow-y:auto;
+
+    }
+
+
+        .su-table-popover-cont-class{
+            padding: 6px;
+            max-width: 200px;
+        }
+
 
         .su-table-sync-out{
             ::-webkit-scrollbar{
@@ -335,5 +554,54 @@
                 white-space: nowrap;
                 text-overflow: ellipsis;
             }
+
+
+            .su-checkbox{
+                    background: white;
+                    border: 1px solid darkgrey;
+                    border-radius: 3px;
+                    width: 16px;
+                    height: 16px;
+                    display: inline-block;
+                    position: relative;
+                    white-space: nowrap;
+                    color: #5a5e66;
+                    font-size: 14px;
+                    cursor: pointer;
+                    user-select: none;
+            }
+            .su-checkbox-is-checkbox.su-checkbox,.su-checkbox-indeterminate.su-checkbox{
+                background: #32c081;
+                border-color: #32c081;
+            }
+
+            .su-checkbox-indeterminate:before{
+                position: absolute;
+                left: 3px;
+                top: 6px;
+                content: '';
+                width: 10px;
+                height: 1px;
+                border-bottom: 2px solid white;
+            }
+            .su-checkbox-is-checkbox:after{
+                transform: rotate(-45deg);
+                position: absolute;
+                left: 2px;
+                top: 3px;
+                content: '';
+                width: 10px;
+                height: 4px;
+                border-left: 2px solid white;
+                border-bottom: 2px solid white;
+            }
+            .su-table-checkbox{
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
         }
+
+
+
 </style>
