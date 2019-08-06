@@ -5,7 +5,7 @@
                     :visible-arrow="false"
                     ref="su_menban"
             >
-                    <div @click.stop='' class="su-menbanout" :style="{width:width+'px',height:height+'px'}">
+                    <div @click.stop=''  class="su-menbanout" :style="{width:width+'px',height:height+'px'}">
                         <slot></slot>
                     </div>
             </su-popover>
@@ -51,6 +51,9 @@
                 this.$refs.su_menban.referenceElm=el;
                 this.$nextTick(()=>{
                     this.$refs.su_menban.doDestroy();
+                    console.log(this);
+
+
                     this.su_menban_show=true;
                 });
 
@@ -75,7 +78,8 @@
     }
 </script>
 <style lang="scss">
-    .table_change_moban>.issolota{
+    .table_change_moban > .issolota{
+
         /*表头浮动*/
         .el-table {
             overflow: auto;
@@ -95,8 +99,15 @@
         }
 
     }
+    .su-menbanout{
+        .su-table-out-bodys{
+            td>span{height: 26px;display: inline-block;}
+        }
+    }
+
 </style>
 <style lang="scss" scoped>
+
     .su-menbanout>div{
         width: 100%;
         height: 100%;

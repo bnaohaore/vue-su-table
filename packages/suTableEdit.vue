@@ -1,12 +1,12 @@
 
 <template>
-    <div class="su-table-edit" :class="{inEdit_class:inEdit}" :title=showText()  @dblclick="showEdit" >
+    <div class="su-table-edit" :class="{inEdit_class:inEdit,disabled_class:disabled}" :title=showText()  @dblclick="showEdit" >
         <template v-if="!inEdit">
             {{layer=='input' || layer=='auto' ? value : layer=='select' || layer=='selectSearch' ? dflabel : ''}}
         </template>
         <template v-else>
             <template v-if="layer=='input'">
-                <input style="height: 100%;width: 100%" :type="type"  @keydown="input_keydown"  @keyup="input_keyup" ref="editInput"  @blur="editInputBlur" v-model="inputValue" />
+                <input style="height: 100%;width: 100%"  :type="type"  @keydown="input_keydown"  @keyup="input_keyup" ref="editInput"  @blur="editInputBlur" v-model="inputValue" />
             </template>
             <template v-if="layer=='auto'">
                 <input style="height: 100%;width: 100%" @click.stop='' :type="type"  @keydown="auto_keydown"  @keyup="auto_keyup" ref="editAuto"  @blur="editAutoBlur" v-model="inputAutoValue" />
@@ -32,6 +32,8 @@ export default {
     name:'suTableEdit',
     data(){
         return {
+            $copyIndex:null,
+            $copyRow:null,
             rangindex:'',
             inEdit:false,
             inputAutoValue:'',
@@ -41,18 +43,27 @@ export default {
         }
     },
     created(){
-        if(this.layer=='select' || this.layer=='selectSearch'){
-            this.selectText=this.dflabel
-        }
+        /*if(this.$parent.$parent.$parent.$options._componentTag=='su-table-sync'){
+           console.log(this.$parent.$parent.tableData)
+        }*/
+      //  this.$copyIndex=this.$parent.$parent.tableData[this.row].$copyIndex
+
     },
 
     mounted(){
-
+        if(this.layer=='select' || this.layer=='selectSearch'){
+            this.selectText=this.dflabel;
+        }
     },
     props:{
-
+        //自定义弹层内的table
+        tableRef:null,
         //自定义弹层
         autoRef:null,
+        disabled:{
+            default: false,
+            type:Boolean
+        },
         selectData:{
             default:()=>{return []},
             type:Array
@@ -85,6 +96,7 @@ export default {
     methods: {
         //可搜索下拉
         selectSearch_valueSearch(val,update){
+            console.log(val);
             this.$emit('selectSearch',val,update)
         },
         select_keyup(){
@@ -124,15 +136,26 @@ export default {
         },
         auto_keyup(){
 
+
             if(event.keyCode===37 && event.ctrlKey ){
                 event.stopPropagation();
                 event.preventDefault();
                 this.showNextEdit('to_pre')
             }
 
+            if(this.tableRef && this.autoRef){
+
+
+                if(event.keyCode==40){
+                    this.tableRef.change_activeindex('next')
+                }
+                if(event.keyCode==38){
+                    this.tableRef.change_activeindex('pre')
+                }
+            }
             if(this.inEdit){
+                let codess=event.keyCode;
                 if(this.$listeners.hasOwnProperty('autoKeyup')){
-                    let codess=event.keyCode;
                     thottles_autoKeyCode.timeEnd(()=>{
                         this.$emit('autoKeyup',{value:this.inputAutoValue, row:this.$parent.$parent.sync ? this.$parent.$parent.tableData[this.row]['$copyIndex'] : this.row,keyCode:codess},this.showNextEdit);
                     },100);
@@ -145,6 +168,15 @@ export default {
                 event.preventDefault();
                 this.showNextEdit()
             }
+
+
+         /*   if(event.keyCode=='40'){
+                this.autoRef.change_activeindex('next')
+            }
+            if(event.keyCode=='38'){
+                this.autoRef.change_activeindex('pre')
+            }*/
+
 
         },
         auto_keydown(){
@@ -234,10 +266,13 @@ export default {
           //  this.inEdit=false;
         },
         hideEdit(){
+           // if(!this.inEdit){return}
             return new Promise((success,err)=>{
                 this.inEdit=false;
                 if(this.layer=='auto'){
-
+                    if(this.tableRef && this.autoRef){
+                        this.tableRef.clear_activeindex()
+                    }
                 }
                 if(this.layer=='input'){
                 }
@@ -259,21 +294,28 @@ export default {
             },100)
         },*/
         showEdit(){
-              this.inEdit=true;
 
+            if(this.disabled){return}
+
+             this.inEdit=true;
+             this.$copyIndex= this.$parent.$parent.tableData[this.row].$copyIndex  ;
+
+             //回到当前编辑框位置
               this.$nextTick(()=>{
                   if(!this.$parent.isfixed){
                      this.$parent.$parent.set_scroll_left(this.$el)
                   }
               });
-
+             //设置当前编辑对象
               this.$parent.$parent.setEdit(this);
+
               if(this.layer=='input'){
                   this.inputValue=this.value;
                       this.$nextTick(()=>{
                           this.$refs.editInput.focus();
                       })
               }
+
               if(this.layer=='select' || this.layer=='selectSearch'){
                   this.selectValue=this.value;
                   this.$nextTick(()=>{
@@ -288,7 +330,23 @@ export default {
                   this.$nextTick(()=>{
                       this.$refs.editAuto.focus();
                   })
+
               }
+              if(this.$listeners.hasOwnProperty('openEdit')){
+                  this.$nextTick(()=>{
+                      this.$emit('openEdit',this.get_this_data())
+                  })
+              }
+
+        },
+        get_this_data(){
+            let data={
+                 row:this.$parent.$parent.sync ? this.$parent.$parent.tableData[this.row]['$copyIndex'] : this.row,
+                 col:this.col,
+                 label: this.layer=='input' || this.layer=='auto' ? this.value : this.layer=='select' || this.layer=='selectSearch' ? this.dflabel : '',
+                 value:this.layer=='select' || this.layer=='selectSearch' ? this.selectValue : '',
+            };
+            return data
         },
         //select 外部赋值 反写label
 
@@ -353,5 +411,10 @@ export default {
         justify-content: center;
         height: 100%;
         width: 100%;
+    }
+    .disabled_class{
+       color: #8c939d;
+        border-color: #8c939d;
+
     }
 </style>

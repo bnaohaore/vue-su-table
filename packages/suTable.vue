@@ -14,13 +14,13 @@
             </div>
             <!--body-->
             <div class="su-table-out-bodys"   @scroll="setscroll" ref="bodyoutref" style="flex:1;overflow: auto;">
-                <su-table-body ref='tablebody_ref'  :style="{width:bodyWidth+'px'}" @mousemove.native="bodymousemove"></su-table-body>
+                <su-table-body  ref='tablebody_ref'   :style="{width:bodyWidth+'px'}" @mousemove.native="bodymousemove"></su-table-body>
                 <div :style="{ width: bodyWidth+'px' }" style="height: 100%;display: flex;align-items: center;justify-content: center" v-if="!tableData || tableData.length === 0">
                     <span class="el-table__empty-text">暂无数据</span>
                 </div>
             </div>
             <div @mousewheel="fixed_set_body_scroll"  v-if="headerData[0].fixed"  :style="{ height:(bodyHeight-8)+'px',top:suHeaderHeight+'px',width:leftFixedWidth+'px'}" class="su-table-out-bodys-flexd-right" :class="{bodysleft0:bodyleft!=0}" style="height: 100%;overflow: hidden;">
-                <su-table-body :isfixed="true" ref="tablebody_fixed_ref" @mousemove.native="bodymousemove" :style="{transform:'translateY('+-bodytop+'px)',width:bodyWidth+'px'}"></su-table-body>
+                <su-table-body :isfixed="true" ref="tablebody_fixed_ref"  @mousemove.native="bodymousemove" :style="{transform:'translateY('+-bodytop+'px)',width:bodyWidth+'px'}"></su-table-body>
             </div>
         </template>
         <su-popover v-model="showHidePopover"  ref="showHidePopover">
@@ -37,14 +37,17 @@
     let thottles_scroll=new thottles();
     let thottles_popover=new thottles();
     let thottles_checked_init=new thottles();
+
     export default {
         name:'suTable',
         data() {
             return {
+                myDefData:['suChecked', 'suActive', '$copyIndex'],
                 initCheckedisld:true, //拦截
                 isIndeterminate:false,
+                checkedArr:[],
                 suChecked:false,
-
+                haveCheckbox:false,
                 showHidePopover_cont:'',
                 showHidePopover:false,
                 isEditRef:null,
@@ -54,6 +57,7 @@
                     show:false,
                 },  //控制虚线
                 showbody:false,
+                activeindex:'', //点击选中行
                 mousmoveindex:null, //鼠标移入高亮行
                 suHeaderHeight:0, //表头高度
                 bodyHeight:0, //表格body高度
@@ -71,6 +75,8 @@
             }
         },
         props:{
+            colClass:'',
+            rowClass:'',
             tableData:{
                 default:()=>[],
                 type:Array
@@ -78,6 +84,11 @@
         },
         created(){
             window.addEventListener('resize',this.set_init,false);
+            this.headerData.forEach((arr=>{
+                if(arr.type=='checkbox'){
+                    this.haveCheckbox=true
+                }
+            }))
         },
         beforeDestroy(){
             window.removeEventListener('resize',this.set_init);
@@ -110,14 +121,40 @@
                 this.$nextTick(()=>{
                     this.initCheckedisld=true;
                 });
+                this.checkedChange()
             },
             set_checked(index,val){
               //  if(!this.initCheckedisld){return}
                 if(this.$parent.$options.name=='suTableSync'){
-
                     this.$parent.tableData[this.$parent.datas[index].$copyIndex].suChecked=val;
                     this.initChecked();
+                }else {
+                    this.tableData[index].suChecked=val;
+                    this.initChecked();
                 }
+                this.checkedChange()
+            },
+            checkedChange(){
+                this.checkedArr=this.get_checked();
+              //  this.$emit('checkedChange',this.get_checked())
+            },
+            get_checked(){
+                let arrs=[];
+                if(this.$parent.$options.name=='suTableSync'){
+                    this.$parent.tableData.forEach(val=>{
+                        if(val.suChecked){
+                            arrs.push(val)
+                        }
+                    });
+
+                }else {
+                    this.tableData.forEach(val=>{
+                        if(val.suChecked){
+                            arrs.push(val)
+                        }
+                    });
+                }
+                return arrs
             },
             //初始化表头checked
             initChecked(){
@@ -132,7 +169,11 @@
                                 if(!val.suChecked){
                                     have_noselect=true
                                 }
-                            })
+                            });
+                        if(this.$parent.tableData.length==0){
+                            this.isIndeterminate=false;
+                            this.suChecked=false;
+                        }
                     }
                     if(have_select && have_noselect){
                         this.isIndeterminate=true;
@@ -197,16 +238,6 @@
                     editfixed=this.$refs.tablebody_fixed_ref ? this.$refs.tablebody_fixed_ref.get_edit(rows,cols,types) : null;
                 }
                 if(edit || editfixed){
-
-                   /* if(mmt && !mmt.$parent.isfixed){
-                        setTimeout(()=>{
-                            let hidex= (this.leftFixedWidth+this.$refs.tableout.getBoundingClientRect().x)-mmt.$el.getBoundingClientRect().x;
-                            console.log(hidex);
-                            if(hidex>0){
-                                this.$refs.bodyoutref.scrollLeft=this.$refs.bodyoutref.scrollLeft-hidex
-                            }
-                            },100);
-                    };*/
                     return edit || editfixed
                 } else {
                     if(rows>this.tableData.length-1){
@@ -214,7 +245,7 @@
                         return false
                     }
                     if(rows<0 || cols <0){
-                         console.log('终止查找 已到最后一个111');
+
                         return false
                     }
                     return    this.getNextEdit(rows,cols,types);
@@ -258,11 +289,90 @@
             set_mousmoveindex(index){
                 this.mousmoveindex=index
             },
+            change_activeindex(type='next'){
+                let aind= typeof this.activeIndex =='number'  ? this.activeIndex : -1;
+                let ins=type=='next' ? parseFloat(aind+1) : parseFloat(aind-1);
+
+                if(type=='next' && ins==this.tableData.length){
+                    ins=0
+                }
+                if(type=='pre' && ins<0){
+                    ins=this.tableData.length-1
+                }
+                    this.$refs.bodyoutref.scrollTop=ins*27;
+                    this.set_activeindex(ins)
+            },
+            setdefdata(data){
+                let datas={...data};
+                this.myDefData.forEach((arr,index)=>{
+                     delete datas[arr]
+                });
+                return  datas
+            },
+            get_active_row(){
+                return this.setdefdata(this.tableData[this.activeIndex])
+            },
+            clear_activeindex(){
+                this.activeIndex='';
+                if(this.$parent.$options.name!=='suTableSync'){
+
+                    this.tableData.forEach((arr,ind)=>{
+                        if( arr.suActive){
+                            this.tableData.splice(ind,1,{...this.tableData[ind],...{suActive:false}});
+                        }
+                    });
+                }
+
+                if(this.$parent.$options.name=='suTableSync'){
+                    this.$parent.tableData.forEach((arr,ind)=>{
+                        if(arr.suActive){
+                            this.$parent.setData(ind,{suActive:false})
+                        }
+                    });
+                    //this.$parent.setTableData()
+                }
+            },
+            set_activeindex(index){
+                this.activeIndex=index;
+                if(this.$parent.$options.name!=='suTableSync' && this.tableData[index]){
+
+                    this.tableData.forEach((arr,ind)=>{
+                        if(ind!=index && arr.suActive){
+                            this.tableData.splice(ind,1,{...this.tableData[ind],...{suActive:false}});
+                        }
+                    });
+                    this.tableData.splice(index,1,{...this.tableData[index],...{suActive:true}});
+                }
+
+                if(this.$parent.$options.name=='suTableSync' && this.$parent.tableData[index]){
+                    this.$parent.tableData.forEach((arr,ind)=>{
+                        if(ind!=index && arr.suActive){
+                            this.$parent.setData(ind,{suActive:false})
+                        }
+                    });
+                    this.$parent.setData(index,{suActive:true});
+                    //this.$parent.setTableData()
+                }
+            },
+            set_checkboxindex(index,type=true){
+                if(this.$parent.$options.name!=='suTableSync'){
+                    this.tableData.splice(index,1,{...this.tableData[index],...{suChecked:type}});
+                }
+                if(this.$parent.$options.name=='suTableSync'){
+                    this.$parent.setData(index,{suChecked:type});
+                    this.initChecked();
+                    //this.$parent.setTableData()
+                }
+            },
             //body滚动触发
             setscroll(){
+
                this.$refs.tablebody_ref.$el.style.pointerEvents='none';
                 thottles_scroll.timeEnd(()=>{
                     this.$refs.tablebody_ref.$el.style.pointerEvents='auto';
+                    if((this.$refs.bodyoutref.clientHeight+this.$refs.bodyoutref.scrollTop)>=this.$refs.tablebody_ref.$el.offsetHeight){
+                       this.$emit('tableBottom')
+                    }
                 },100);
                 this.$nextTick(()=>{
                         this.bodytop=this.$refs.bodyoutref.scrollTop;
@@ -271,23 +381,6 @@
               //  this.$refs.headerOut.$el.setAttribute('style','transform: translateX(-20px);-webkit-transform: translateX(-20px)')
             },
             set_headerdata(data){
-              /*if(  data.type=='checkbox'){
-                  console.log(this.tableData)
-                  this.tableData.forEach((arr,index)=>{
-                      if(!arr.hasOwnProperty('checked')){
-                          this.tableData[index].checked=''
-                      }
-                  });
-                  if(this.$parent.$options.name=='suTableSync'){
-
-                      this.$parent.tableData.forEach((arr,index)=>{
-                          if(!arr.hasOwnProperty('checked')){
-                              console.log(index);
-                              this.$parent.tableData[index].checked=''
-                          }
-                      })
-                  }
-              }*/
                 this.headerData.push(data)
             },
             //设置初始化数据
@@ -297,8 +390,31 @@
                    this.suHeaderHeight=this.$refs.suHeaderFef.offsetHeight;
                    this.scrollWidth=(this.$refs.bodyoutref.offsetWidth-this.$refs.bodyoutref.clientWidth);
                 //   let slotcol=this.$scopedSlots.default();
+           },
+            set_row_class(rowdata){
+                if(this.rowClass){
+                    if(typeof this.rowClass == 'function'){
+                        return this.rowClass(rowdata)
+                    }else {
+                        return this.rowClass
+                    }
+                }else {
+                    return ''
+                }
 
-           }
+            },
+            set_col_class(coldata,rowData){
+                if(this.rowClass){
+                    if(typeof this.colClass == 'function'){
+                        return this.colClass(coldata,rowData)
+                    }else {
+                        return this.colClass
+                    }
+                }else {
+                    return ''
+                }
+
+            }
         },
         mounted(){
             this.showbody=true;
@@ -313,7 +429,6 @@
         computed:{
             //设置浮动表格宽度
             leftFixedWidth(){
-
                 let leftFixedWidth=0;
                 if(this.headerData[0].fixed){
                     for(let sdgf=0;sdgf<this.headerData.length;sdgf++){
@@ -335,11 +450,23 @@
             } //表格body宽度
         },
         watch: {
+            'checkedArr'(val,old){
+
+                    if(JSON.stringify(val) != JSON.stringify(old)){
+                        this.$emit('checkedChange',val);
+                    }
+
+
+
+
+            },
             'tableData.length'(){
-                this.$nextTick(()=>{
-                    this.initChecked();
-                });
-                console.log(333)
+                if(!this.$parent.$options.name=='suTableSync'){
+                    this.$nextTick(()=>{
+                        this.initChecked();
+                    });
+                }
+
             }
         },
         components: {
@@ -506,10 +633,15 @@
                 z-index: 9989;
             }
             .su_hover_tr{
-                >span{
-                    color: white;
-                }
+
+                color: white ;
+                background: #99e0c0;
+               // opacity: 0.5;
+            }
+            .su_active_tr{
+                color: white ;
                 background: #32c081;
+                opacity: 1;
             }
             .su-table-out-header td,th , .su-table-out-header-fixed-right td,th{
                 background: #cbdbe1;
@@ -533,6 +665,8 @@
                 table-layout: fixed;
                /* width:100%*/
             }
+
+
             .su-table-out-bodys-flexd-right{
                 background: white;
                 position: absolute;

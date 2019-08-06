@@ -1,6 +1,6 @@
 {
   "name": "vue-su-table",
-  "version": "1.4.2",
+  "version": "2.0.1",
   "description": "基于vue2.5的可编辑表格 支持超过1w条数据的操作",
   "main": "index.js",
   "scripts": {

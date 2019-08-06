@@ -1,6 +1,6 @@
 
 <template>
-    <div @click.stop=""  style="position: relative;display: inline-block"  ref="suselectref" >
+    <div @click.stop=""  style="position: relative;display: inline-block;color: #5a5e66"  ref="suselectref" >
         <su-popover
                 v-model="su_select_menban_show"
                 :visible-arrow="false"
@@ -47,7 +47,6 @@ export default {
     },
     created(){
         window.addEventListener('click',this.hideMenban)
-
     },
     beforeDestroy(){
         this.inpoppers=false;
@@ -57,16 +56,18 @@ export default {
         }
     },
     computed:{
-      /*  activeName(){
-            return  this.findtext(this.value)
-        },*/
+
     },
     mounted(){
         if(!this.$scopedSlots.default || this.$scopedSlots.default && this.$scopedSlots.default().length<=0){
             this.noVnode=true
         }
-        if(this.value){
-            this.activeName=this.$parent.dflabel
+        if(this.value && this.$parent.dflabel){
+            this.activeName=this.$parent.dflabel;
+            console.log(this.activeName)
+        }
+        if(!this.value){
+            this.$emit('valueSearch','')
         }
     },
     props:{
@@ -142,6 +143,7 @@ export default {
         },
         set_text(text){
             this.activeName=text
+            console.log(this.activeName)
         },
         //隐藏menban
         hideMenban(){
@@ -163,7 +165,11 @@ export default {
             })
         },
         activeName(val,old){
+            console.log(val)
             if(this.searchType=='search'){
+                console.log(val);
+                console.log(old);
+                console.log(111);
                     if(this.$refs.spopovers){
                         thottles_valueSrarch.timeEnd(()=>{
                             this.$emit('valueSearch',val)

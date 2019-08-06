@@ -24,7 +24,8 @@ export default {
          /*   console.log(this.$parent.$parent.value);
             console.log(this.label);
             console.log(this.value)*/
-          //  this.$parent.$parent.set_text(this.label)
+           // this.$parent.$parent.set_text(this.label);
+            console.log(this.label+'333333333333')
         }else {
             this.isactive=false;
         }

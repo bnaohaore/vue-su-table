@@ -30,6 +30,9 @@ export default {
             if(!this.tableData[index].hasOwnProperty('suChecked')){
                 this.tableData[index].suChecked=false
             }
+            if(!this.tableData[index].hasOwnProperty('suActive')){
+                this.tableData[index].suActive=false
+            }
             this.tableData[index].$copyIndex=index
         });
     },
@@ -91,9 +94,9 @@ export default {
                     this.datas.splice(index,1,{...this.datas[index],...data});
                 }
             });
-            if(data.hasOwnProperty('suChecked')){
+            /*if(data.hasOwnProperty('suChecked')){
                 this.suTable.initChecked();
-            }
+            }*/
         },
         init_end(cb){
             this.cbfn=cb
@@ -171,7 +174,11 @@ export default {
             thottles_set_tableData.timeEnd(()=>{
                 let isedit=this.suTable.isEditRef;
                 if(isedit){
-                    isedit.hideEdit();
+                    if(isedit.layer=='auto' && isedit.autoRef){
+                        isedit.autoRef.hideMenban()
+                    }else {
+                        isedit.hideEdit();
+                    }
                 }
             let nums=Math.floor(this.bdclientHeight/27)-1;
             let start=Math.ceil(this.$refs.scrolland.scrollTop/27);
@@ -204,25 +211,34 @@ export default {
                 this.$nextTick(()=>{
                     this.$emit('updateEnd');
                     this.is_copy=false;
-
                 });
 
             })
-            },16)
+            },30)
         }
     },
     watch: {
         'tableData.length'(){
+            thottles_refish.timeEnd(()=>{
                 this.$nextTick(()=>{
                     this.is_copy=true;
                     this.tableData.forEach((arr,index)=>{
                         if(!this.tableData[index].hasOwnProperty('suChecked')){
                             this.tableData[index].suChecked=false
                         }
+                        if(!this.tableData[index].hasOwnProperty('suActive')){
+                            this.tableData[index].suActive=false
+                        }
                         this.tableData[index].$copyIndex=index
                     });
+                    if(this.suTable){
+                        this.suTable.initChecked();
+                        this.suTable.checkedChange()
+                    }
+
                     this.setTableData()
                 })
+            },100)
            // this.datas.push(this.tableData[0])
         },
    /*     datas: {

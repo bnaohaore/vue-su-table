@@ -30,8 +30,8 @@ export default {
     /**/
     render(h,context){
         return  (
-            <div class={"su-table-checkbox"}>
-                <label  role="checkbox"  class={{'su-checkbox':true,'su-checkbox-is-checkbox':this.nowChecked && !this.indeterminate,'su-checkbox-indeterminate':this.indeterminate}}>
+            <div  class={"su-table-checkbox"}>
+                <label onClick={()=>event.stopPropagation()} role="checkbox"  class={{'su-checkbox':true,'su-checkbox-is-checkbox':this.nowChecked && !this.indeterminate,'su-checkbox-indeterminate':this.indeterminate}}>
                     <input onClick={this.clickssss} type="checkbox" style="display:none;" v-model={this.nowChecked}  />
                 </label>
             </div>
@@ -39,7 +39,6 @@ export default {
     },
     mounted(){
         this.$watch("nowChecked",(val)=>{
-
             //  this.$parent.set_checked(this.row,val);
             this.$emit('input',val);
             this.$emit('change',val)
