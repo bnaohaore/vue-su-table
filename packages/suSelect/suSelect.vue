@@ -1,6 +1,6 @@
 
 <template>
-    <div @click.stop=""  style="position: relative;display: inline-block;color: #5a5e66"  ref="suselectref" >
+    <div @click.stop="" class="su-select-out" style="position: relative;display: inline-block;color: #5a5e66"  ref="suselectref" >
         <su-popover
                 v-model="su_select_menban_show"
                 :visible-arrow="false"
@@ -11,13 +11,13 @@
                 <div v-show="!$scopedSlots.default" class="suOptionOut">暂无数据</div>
             </div>
             <div  v-if="searchType=='input'" slot="reference"  ref="reference" @keyup="stopstab" @keydown="keydownHide">
-                <div @click.stop="" class="suSelectOut" >
-                    <span @click.stop="">{{activeName}}</span><!--<span class="biaoshi" style="display: inline-block" :class="{rotate180 : su_select_menban_show}">v</span>-->
+                <div @click.stop="" class="suSelectOut" style="height: 28px;line-height: 28px">
+                    {{activeName}}<!--<span class="biaoshi" style="display: inline-block" :class="{rotate180 : su_select_menban_show}">v</span>-->
                 </div>
             </div>
             <div   v-if="searchType=='search'"  slot="reference">
                 <div  class="suSelectOut">
-                    <input @click.stop="" style="height: 100%;width: 100%;border: 0"  ref="reference" @keyup="stopstab" @keydown="keydownHide" v-model="activeName"/>
+                    <input @click.stop="" style="height: 28px;line-height:28px;width: 100%;border: 0"  ref="reference" @keyup="stopstab" @keydown="keydownHide" v-model="activeName"/>
                 </div>
             </div>
 
@@ -64,7 +64,7 @@ export default {
         }
         if(this.value && this.$parent.dflabel){
             this.activeName=this.$parent.dflabel;
-            console.log(this.activeName)
+
         }
         if(!this.value){
             this.$emit('valueSearch','')
@@ -142,8 +142,8 @@ export default {
             })
         },
         set_text(text){
-            this.activeName=text
-            console.log(this.activeName)
+            this.activeName=text;
+
         },
         //隐藏menban
         hideMenban(){
@@ -165,11 +165,9 @@ export default {
             })
         },
         activeName(val,old){
-            console.log(val)
+
             if(this.searchType=='search'){
-                console.log(val);
-                console.log(old);
-                console.log(111);
+
                     if(this.$refs.spopovers){
                         thottles_valueSrarch.timeEnd(()=>{
                             this.$emit('valueSearch',val)

@@ -42,7 +42,7 @@ export default {
             <div class={"su-table-sync-out"}>
                 <div   style={{marginTop:this.mgt+'px',height:this.bdclientHeight+'px',boxSizing: 'border-box', position: 'absolute',top: 0,right:0,width: '10px',background: 'rgba(0,0,0,0)',zIndex: 998}} >
                     <div ref="scrolland" style="height: 100%;width: 100%;overflow-y: auto;">
-                        <div style={{'height':27*this.tableData.length+'px','width': '100%'}} ></div>
+                        <div style={{'height':33*this.tableData.length+'px','width': '100%'}} ></div>
                     </div>
                 </div>
                 { this.$scopedSlots.default({data:this.datas}) }
@@ -65,7 +65,6 @@ export default {
             this.tableBody.addEventListener('mousewheel',this.set_bodyscroll,false);
             this.init();
         });
-
        // this.datas.push(this.tableData[0])
     },
     beforeDestroy(){
@@ -75,7 +74,7 @@ export default {
         this.$refs.scrolland.removeEventListener('scroll',this.setTableData,false);
         window.removeEventListener('resize',this.init,false);
         this.tableBody.removeEventListener('mousewheel',this.set_bodyscroll,false);
-
+        this.$off('updateEnd');
             for(var sd in this.data){
                 this.data[sd]=null
             }
@@ -103,8 +102,8 @@ export default {
         },
         showEdit(row,col){
             if(row>this.tableData.length){return}
-            this.$refs.scrolland.scrollTop=(row*27);
-            if((27*this.tableData.length)==(this.$refs.scrolland.scrollTop+this.tableBody.clientHeight) || this.$refs.scrolland.scrollTop==0){
+            this.$refs.scrolland.scrollTop=(row*33);
+            if((33*this.tableData.length)==(this.$refs.scrolland.scrollTop+this.tableBody.clientHeight) || this.$refs.scrolland.scrollTop==0){
                 this.setTableData()
             }
             this.cbfn=()=>{
@@ -140,13 +139,13 @@ export default {
              }*/
             this.cbfn=cb;
 
-            let add_top=types=='to_pre' ? -27 : 27;
+            let add_top=types=='to_pre' ? -33 : 33;
             this.$refs.scrolland.scrollTop=(this.$refs.scrolland.scrollTop || 0) + add_top ;
            // cb(true);
         },
         //body滚轮滚动
         set_bodyscroll(){
-            if((this.tableData.length*27)<this.tableBody.clientHeight){return}
+            if((this.tableData.length*33)<this.tableBody.clientHeight){return}
 
             let fx=true;
 
@@ -158,7 +157,7 @@ export default {
             if( event.wheelDelta<0){
                 fx=true;
             }
-            this.$refs.scrolland.scrollTop=(this.$refs.scrolland.scrollTop || 0) + (fx ? 27 : -27);
+            this.$refs.scrolland.scrollTop=(this.$refs.scrolland.scrollTop || 0) + (fx ? 33 : -33);
             this.setTableData()
         },
         //初始化
@@ -166,7 +165,7 @@ export default {
                 this.mgt=this.suTable.$el.querySelectorAll('.su-table-out-header')[0].clientHeight;
                 this.bdclientHeight=this.suTable.$el.querySelector('.su-table-out-bodys').clientHeight;
                 this.setTableData();
-            this.suTable.$el.querySelector('.su-table-out-bodys').scrollTop=0;
+                this.suTable.$el.querySelector('.su-table-out-bodys').scrollTop=0;
         },
         //对应数据
         setTableData(){
@@ -180,8 +179,8 @@ export default {
                         isedit.hideEdit();
                     }
                 }
-            let nums=Math.floor(this.bdclientHeight/27)-1;
-            let start=Math.ceil(this.$refs.scrolland.scrollTop/27);
+            let nums=Math.floor(this.bdclientHeight/33)-1;
+            let start=Math.ceil(this.$refs.scrolland.scrollTop/33);
 
             this.$nextTick(()=>{
                 if(this.datas.length>this.tableData.length){
@@ -219,7 +218,7 @@ export default {
     },
     watch: {
         'tableData.length'(){
-            thottles_refish.timeEnd(()=>{
+
                 this.$nextTick(()=>{
                     this.is_copy=true;
                     this.tableData.forEach((arr,index)=>{
@@ -231,14 +230,15 @@ export default {
                         }
                         this.tableData[index].$copyIndex=index
                     });
-                    if(this.suTable){
-                        this.suTable.initChecked();
-                        this.suTable.checkedChange()
-                    }
-
+                    thottles_refish.timeEnd(()=>{
+                        if(this.suTable){
+                            this.suTable.initChecked();
+                            this.suTable.checkedChange()
+                        }
+                    },100);
                     this.setTableData()
                 })
-            },100)
+
            // this.datas.push(this.tableData[0])
         },
    /*     datas: {

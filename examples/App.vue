@@ -1,9 +1,19 @@
 <template>
   <div id="app">
+    <div @click="topath('/')">页面1</div>
+    <div @click="topath('/About')">页面2</div>
     <router-view/>
   </div>
 </template>
-
+<script>
+  export  default  {
+      methods:{
+          topath(src){
+              this.$router.push(src)
+          }
+      }
+  }
+</script>
 <style lang="scss">
   *{margin: 0;padding: 0}
   html{height: 100%;width: 100%}
@@ -15,7 +25,6 @@
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #2c3e50;
 }
 #nav {

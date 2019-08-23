@@ -23,8 +23,11 @@
                 :colClass //自定义列的class 可以绑定 string function
                 <br>
                 方法<br>
-                @lastEntry 最后一行切换后执行<br>
-                @tableBottom //普通模式启用 滚动到最后一行执行
+                @rowClick //单机触发
+                @rowDblclick //双击触发
+                @checkedChange //复选框改变时触发 <br>
+                @lastEntry //最后一行切换后执行<br>
+                @tableBottom //普通模式启用 滚动到最后一行执行<br>
                 $refs.suTable.set_activeindex(0) //单选第一行  <br>
                 $refs.suTableRef.set_checkboxindex(1,true)  //修改第二行复选选框状态 为选中<br>
 
@@ -33,7 +36,7 @@
             <p>
                 组件 su-table-column 用于渲染列
                 <br>
-                参数  :fixed="true" (设置当前列浮动)  type='checkbox'  (设置列为复选框列)  label='名字'(表头文字) prop="name"(字段名)
+                参数  :fixed="true" (设置当前列浮动)  type='checkbox'  (设置列为复选框列)  label='名字'(表头文字) prop="name"(字段名) align="right" (right\center\left)
                 <br>
                 自定义 列 详情见示列  <br>
                 自定义 表头 详情见示列
@@ -81,6 +84,7 @@
                     <su-table
                               @checkedChange="checkedChange"
                               ref="suTableRef"
+                              @rowDblclick='rowDblclick'
                               @rowClick='rowClick'
                               :tableData="scope.data"
                               @lastEntry="lastEntry"
@@ -88,9 +92,17 @@
                               :colClass="colClass"
                     >
                         <su-table-column  type='checkbox' :fixed="true"></su-table-column>
-                        <su-table-column  label='自定义弹层'>
+                        <su-table-column  label='自定义弹层' :fixed="true">
                             <template slot-scope="scope">
-                                <su-table-edit @openEdit="openEdit" :tableRef='$refs.menban1SuTableRef' :autoRef="$refs.menban1" @autoKeyup="autoKeyup"  :col="scope.$colIndex" :row="scope.$rowIndex" layer="auto" v-model="scope.row.orderText" ></su-table-edit>
+                                <su-table-edit
+                                        @openEdit="openEdit"
+                                        :tableRef='$refs.menban1SuTableRef'
+                                        :autoRef="$refs.menban1"
+                                        @autoKeyup="autoKeyup"
+                                        :col="scope.$colIndex"
+                                        :row="scope.$rowIndex"
+                                        layer="auto"
+                                        v-model="scope.row.orderText" ></su-table-edit>
                             </template>
                         </su-table-column>
                         <su-table-column >
@@ -106,7 +118,7 @@
                                 <div style="display: flex;width: 100%"><div style="flex:1;">{{scope.row.old}}{{scope.row.name}}</div><div  style="flex:1;">{{scope.row.year}}</div></div>
                             </template>
                         </su-table-column>
-                        <su-table-column  label='普通input' >
+                        <su-table-column align='right' label='普通input' >
                             <template slot-scope="scope">
                                 <su-table-edit :disabled='scope.row.name ? true : false' @openEdit="openEdit" @confirm="inputConfirm" @editValueChange="inputchanges" :col="scope.$colIndex" :row="scope.$rowIndex" layer="input" v-model="scope.row.name" ></su-table-edit>
                             </template>
@@ -223,7 +235,7 @@
                     {value:'59',label:'59油条大油条大大的油条'},
                 ],
                 selectSearchDatatwo:[],
-                su_tableData:[{name:'莞',old:'213',index:11111,sucai2:'57',sucai2Str:'57冰块4',sucai:'2',sucaiStr:'花菜',date:'2011-11-11',time:'15:10',orderText:'123'}],
+                su_tableData:[{name:'莞',old:'213',index:11111,sucai2:'57',sucai2Str:'57冰块4',sucai:'2',sucaiStr:'花菜',date:'2011-11-11',time:'15:10',orderText:'12dsfsdfsdfsdfsdfsdfsdfsdfsdf3'}],
                 menban_table:[
                     {name:'莞1',old:'213',index:1,sucai2:'57',sucai2Str:'57冰块4',sucai:'2',sucaiStr:'花菜',date:'2011-11-11',time:'15:10'},
                     {name:'莞2',old:'213',index:2,sucai2:'57',sucai2Str:'57冰块4',sucai:'2',sucaiStr:'花菜',date:'2011-11-11',time:'15:10'},
@@ -287,9 +299,13 @@
                 this.$refs.suTableRef.set_checkboxindex(1,true);
                 //this.su_tableData[0].suActive=true
             },
+            //行双击
+            rowDblclick(val){
+                console.log(val)
+            },
             //行点击
             rowClick(val,index){
-                console.log(val)
+               // console.log(val)
             },
             //自定义弹层 任意按键操作后触发 用于控制弹层  调用next进入下一格
             autoKeyup(data,next){
@@ -414,7 +430,6 @@
                 if(data=='date' && rowData.$copyIndex==7){
                     return 'zdy_col_class'
                 }
-
 
             },
         }

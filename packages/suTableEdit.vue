@@ -1,15 +1,15 @@
 
 <template>
-    <div class="su-table-edit" :class="{inEdit_class:inEdit,disabled_class:disabled}" :title=showText()  @dblclick="showEdit" >
+    <div class="su-table-edit" :class="{focusClass:focusClass, inEdit_class:inEdit,disabled_class:disabled}" :title="showText()"  @dblclick="showEdit" >
         <template v-if="!inEdit">
             {{layer=='input' || layer=='auto' ? value : layer=='select' || layer=='selectSearch' ? dflabel : ''}}
         </template>
         <template v-else>
             <template v-if="layer=='input'">
-                <input style="height: 100%;width: 100%"  :type="type"  @keydown="input_keydown"  @keyup="input_keyup" ref="editInput"  @blur="editInputBlur" v-model="inputValue" />
+                <input style="height: 28px;line-height: 28px;width: 100%"  :type="type"  @keydown="input_keydown"  @keyup="input_keyup" ref="editInput"  @blur="editInputBlur" v-model="inputValue" />
             </template>
             <template v-if="layer=='auto'">
-                <input style="height: 100%;width: 100%" @click.stop='' :type="type"  @keydown="auto_keydown"  @keyup="auto_keyup" ref="editAuto"  @blur="editAutoBlur" v-model="inputAutoValue" />
+                <input style="height: 28px;line-height: 28px; width: 100%" @click.stop='' :type="type"  @keydown="auto_keydown"  @keyup="auto_keyup" ref="editAuto"  @blur="editAutoBlur" v-model="inputAutoValue" />
             </template>
             <template v-if="layer=='select'">
                 <su-select style="height: 100%;width: 100%" ref="suselectref"   @keyup.native="select_keyup"  @empty_enter="tabFn"  @tab="tabFn"   @onActive="set_select" @close="hideEdit" v-model="selectValue">
@@ -32,6 +32,7 @@ export default {
     name:'suTableEdit',
     data(){
         return {
+            focusClass:false,
             $copyIndex:null,
             $copyRow:null,
             rangindex:'',
@@ -96,7 +97,6 @@ export default {
     methods: {
         //可搜索下拉
         selectSearch_valueSearch(val,update){
-            console.log(val);
             this.$emit('selectSearch',val,update)
         },
         select_keyup(){
@@ -260,7 +260,7 @@ export default {
             }
         },
         editInputBlur(){
-            this.inEdit=false;
+            this.hideEdit()
         },
         editAutoBlur(){
           //  this.inEdit=false;
@@ -269,6 +269,7 @@ export default {
            // if(!this.inEdit){return}
             return new Promise((success,err)=>{
                 this.inEdit=false;
+                this.set_focus_class(false);
                 if(this.layer=='auto'){
                     if(this.tableRef && this.autoRef){
                         this.tableRef.clear_activeindex()
@@ -332,12 +333,41 @@ export default {
                   })
 
               }
+
+                //触发开启编辑钩子
               if(this.$listeners.hasOwnProperty('openEdit')){
                   this.$nextTick(()=>{
                       this.$emit('openEdit',this.get_this_data())
                   })
               }
+                this.set_focus_class(true)
+        },
+        set_focus_class(types=false){
+            //设置当前行的可编辑td高亮
+            let rowDatas= this.$parent.$parent.getRowEdit(this.row);
+            console.log(rowDatas)
+            rowDatas.editArr.forEach((ars)=>{
 
+                if(types){
+                    ars.showFocusClass()
+                }else {
+                    ars.hideFocusClass()
+                }
+
+            });
+            rowDatas.fixedEditArr.forEach((ars)=>{
+                if(types){
+                    ars.showFocusClass()
+                }else {
+                    ars.hideFocusClass()
+                }
+            });
+        },
+        showFocusClass(){
+            this.focusClass=true
+        },
+        hideFocusClass(){
+            this.focusClass=false
         },
         get_this_data(){
             let data={
@@ -404,12 +434,25 @@ export default {
     .inEdit_class{
         border: 1px solid #cbdbe1;
     }
+    .focusClass{
+        border: 1px solid #a6c7ff ;
+        border-radius: 4px;
+    }
+    .su_active_tr .focusClass{
+        border: 1px solid white ;
+    }
+    .su-select-out{
+        outline: none;
+    }
     .su-table-edit{
-
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 100%;
+        input{border: 0;outline:none;}
+        box-sizing: border-box;
+        max-height: 28px;
+        line-height: 28px;
+        overflow: hidden;
+        height: 28px;
+       /* height: 100%;*/
+        min-height: 28px;
         width: 100%;
     }
     .disabled_class{

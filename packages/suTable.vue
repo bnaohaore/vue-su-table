@@ -6,8 +6,8 @@
         <div class="su-table-xx" :style="{left: xx_data.left+'px'}" v-show="xx_data.show"></div>
         <!--header-->
         <template v-if="showbody">
-            <div class="su-table-out-header" ref="suHeaderFef" style="display: flex;flex-direction: row;background: #cbdbe1;" >
-                <su-table-header :style="{transform:'translateX('+-bodyleft+'px)',width:bodyWidth+'px'}" ref="headerOut" :headerData="headerData"></su-table-header><div style="height: 100%;background: #cbdbe1;flex:1;"></div>
+            <div class="su-table-out-header" ref="suHeaderFef" style="display: flex;flex-direction: row;background: #eef1f7;color: #606266;" >
+                <su-table-header :style="{transform:'translateX('+-bodyleft+'px)',width:bodyWidth+'px'}" ref="headerOut" :headerData="headerData"></su-table-header><div style="height: 100%;background: #eef1f7;flex:1;"></div>
             </div>
             <div v-if="headerData[0].fixed" class="su-table-out-header-fixed-right" :class="{bodysleft1:bodyleft!=0}" :style="{width:leftFixedWidth+'px'}" style="display: flex;flex-direction: row;overflow: hidden">
                 <su-table-header :isfixed="true" :style="{width:bodyWidth+'px'}" style="flex:1"  :headerData="headerData"></su-table-header><!--<div style="height: 100%;background: #cbdbe1;" :style="{width:scrollWidth+'px'}"></div>-->
@@ -37,7 +37,7 @@
     let thottles_scroll=new thottles();
     let thottles_popover=new thottles();
     let thottles_checked_init=new thottles();
-
+    let thottles_checked_change=new thottles();
     export default {
         name:'suTable',
         data() {
@@ -221,6 +221,18 @@
                     },100)
                 }
             },
+            getRowEdit(row){
+                let editfixed=[];
+                let edit=[];
+                edit=this.$refs.tablebody_ref.get_row_edit(row);
+                if(this.headerData[0].fixed && this.$refs.tablebody_fixed_ref){
+                    editfixed=this.$refs.tablebody_fixed_ref.get_row_edit(row) ;
+                }
+
+                return {editArr:edit,fixedEditArr:editfixed};
+               /* console.log(edit);
+                console.log(editfixed);*/
+            },
             getNextEdit(row,col,types){
                 //console.log(row);
                 let maxCol=this.headerData.length-1;
@@ -299,7 +311,7 @@
                 if(type=='pre' && ins<0){
                     ins=this.tableData.length-1
                 }
-                    this.$refs.bodyoutref.scrollTop=ins*27;
+                    this.$refs.bodyoutref.scrollTop=ins*33;
                     this.set_activeindex(ins)
             },
             setdefdata(data){
@@ -363,6 +375,7 @@
                     this.initChecked();
                     //this.$parent.setTableData()
                 }
+                this.checkedChange()
             },
             //body滚动触发
             setscroll(){
@@ -451,13 +464,11 @@
         },
         watch: {
             'checkedArr'(val,old){
-
+                thottles_checked_change.timeEnd(()=>{
                     if(JSON.stringify(val) != JSON.stringify(old)){
                         this.$emit('checkedChange',val);
                     }
-
-
-
+                    },100)
 
             },
             'tableData.length'(){
@@ -513,6 +524,7 @@
         }
     }
     .suSelectOut{
+        outline: none;
         text-align: center;
         display: flex;
         align-items: center;
@@ -522,7 +534,8 @@
         // border: 1px solid #dee9eb;
         //  border-radius: 4px;
         box-sizing: border-box;
-        height: 24px;
+        line-height: 28px;
+        height: 28px;
         font-size: 14px;
 
         .rotate180{
@@ -605,11 +618,15 @@
 
             table{
 
-                td>div,td{
-                    height: 26px;
-                    padding: 0;
+                td{
+                    padding: 2px;
                     overflow: hidden;
                     box-sizing: border-box;
+                    >div{
+                        line-height: 28px;
+                        min-height: 28px;
+                        width: 100%;
+                    }
                 }
 
 
@@ -633,20 +650,18 @@
                 z-index: 9989;
             }
             .su_hover_tr{
-
-                color: white ;
-                background: #99e0c0;
+                background: #e1f6ec;
                // opacity: 0.5;
             }
             .su_active_tr{
-                color: white ;
-                background: #32c081;
-                opacity: 1;
+
+                background: #00c081 ;
+
             }
             .su-table-out-header td,th , .su-table-out-header-fixed-right td,th{
-                background: #cbdbe1;
+                background: #eef1f7;
                 font-weight:bold;
-                border-top: 1px solid #dee9eb;
+                border-top: 1px solid #ebeef5;
             }
             .su-table-out-header-fixed-right{
                 position: absolute;
@@ -656,8 +671,8 @@
             table{
                  td,th {
                     box-sizing: border-box;
-                    border-bottom: 1px solid #dee9eb;
-                    border-right: 1px solid #dee9eb;
+                    border-bottom: 1px solid #ebeef5;
+                    border-right: 1px solid #ebeef5;
                 }
 
 
@@ -665,7 +680,6 @@
                 table-layout: fixed;
                /* width:100%*/
             }
-
 
             .su-table-out-bodys-flexd-right{
                 background: white;
@@ -680,9 +694,7 @@
             .bodysleft1{
                 box-shadow:  2px 10px 10px  #888888;
             }
-            .su-table-edit{
-               // border: 1px solid #dee9eb;
-            }
+
             td ,.su-table-edit{
                 overflow: hidden;
                 white-space: nowrap;
@@ -691,11 +703,12 @@
 
 
             .su-checkbox{
+                    box-sizing: initial;
                     background: white;
                     border: 1px solid darkgrey;
                     border-radius: 3px;
-                    width: 16px;
-                    height: 16px;
+                    width: 14px;
+                    height: 14px;
                     display: inline-block;
                     position: relative;
                     white-space: nowrap;
@@ -711,8 +724,8 @@
 
             .su-checkbox-indeterminate:before{
                 position: absolute;
-                left: 3px;
-                top: 6px;
+                left: 2px;
+                top: 5px;
                 content: '';
                 width: 10px;
                 height: 1px;
@@ -721,7 +734,7 @@
             .su-checkbox-is-checkbox:after{
                 transform: rotate(-45deg);
                 position: absolute;
-                left: 2px;
+                left: 1px;
                 top: 3px;
                 content: '';
                 width: 10px;
@@ -730,9 +743,23 @@
                 border-bottom: 2px solid white;
             }
             .su-table-checkbox{
+                min-height: 28px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
+            }
+
+            table th{
+                padding:5px 2px;
+            }
+            .su_align_right{
+                text-align: right;
+            }
+            .su_align_center{
+                text-align: center;
+            }
+            .su_align_left{
+                text-align: left;
             }
         }
 

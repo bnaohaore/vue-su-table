@@ -5,6 +5,7 @@ export default {
     name:'suCheckbox',
     data() {
         return {
+            unWatch:'',
             nowChecked:false,
             over:false,
         }
@@ -38,13 +39,15 @@ export default {
         )
     },
     mounted(){
-        this.$watch("nowChecked",(val)=>{
+      this.unWatch=this.$watch("nowChecked",(val)=>{
             //  this.$parent.set_checked(this.row,val);
             this.$emit('input',val);
             this.$emit('change',val)
-        })
+        });
+
     },
     beforeDestroy(){
+        this.unWatch();
         for(var sd in this.data){
             this.data[sd]=null
         }

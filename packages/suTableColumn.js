@@ -12,6 +12,7 @@
         },
         mounted(){
             this.$parent.set_headerdata({
+                align:this.align == 'right' ? 'su_align_right' : this.align=='center'?  'su_align_center' : 'su_align_left',
                 $scopedSlots:this.$scopedSlots,
                 fixed:this.fixed,
                 width:this.width,
@@ -25,6 +26,10 @@
 
         },
         props:{
+            align:{
+                default: 'left',
+                type:String
+            },
             //默认空 checkbox为开启复选框
             type:{
                 default: '',

@@ -25,7 +25,7 @@ export default {
             console.log(this.label);
             console.log(this.value)*/
            // this.$parent.$parent.set_text(this.label);
-            console.log(this.label+'333333333333')
+
         }else {
             this.isactive=false;
         }
@@ -39,7 +39,7 @@ export default {
             this.$parent.$parent.set_hover_index_val(this.value)
         },
         set_active(){
-            console.log('点击22')
+
             this.$parent.$parent.set_active(this.value,this.label)
         },
     },

@@ -51,9 +51,6 @@
                 this.$refs.su_menban.referenceElm=el;
                 this.$nextTick(()=>{
                     this.$refs.su_menban.doDestroy();
-                    console.log(this);
-
-
                     this.su_menban_show=true;
                 });
 
