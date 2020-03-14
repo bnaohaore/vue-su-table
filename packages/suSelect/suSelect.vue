@@ -6,20 +6,19 @@
                 :visible-arrow="false"
                 ref="spopovers"
         >
-            <div  class="suSelectMenban" ref="suSelectMenban_ref">
+
+            <div  class="suSelectMenban" ref="suSelectMenban_ref" :style="{minWidth:minWidth+'px'}">
                 <slot></slot>
                 <div v-show="!$scopedSlots.default" class="suOptionOut">暂无数据</div>
             </div>
-            <div  v-if="searchType=='input'" slot="reference"  ref="reference" @keyup="stopstab" @keydown="keydownHide">
-                <div @click.stop="" class="suSelectOut" style="height: 28px;line-height: 28px">
-                    {{activeName}}<!--<span class="biaoshi" style="display: inline-block" :class="{rotate180 : su_select_menban_show}">v</span>-->
+
+                <div   slot="reference"  style="position: relative" class="suSelectOut_out" >
+                    <input @click.stop=""  ref="reference" @keyup="stopstab" @keydown="keydownHide" style="height: 28px;line-height:28px;width: 100%;border: 0" v-model="activeName" class="suSelectOut" >
+                    <!--<span class="biaoshi" style="display: inline-block" :class="{rotate180 : su_select_menban_show}">v</span>-->
+                    <div @click="clear_value" class="iconxx" style="display: none; position: absolute;right: 0px;top: 6px;font-size: 12px;height: 16px;line-height:16px;width: 16px;background: #eef1f7;text-align: center;cursor: pointer;border-radius: 16px;">x</div>
                 </div>
-            </div>
-            <div   v-if="searchType=='search'"  slot="reference">
-                <div  class="suSelectOut">
-                    <input @click.stop="" style="height: 28px;line-height:28px;width: 100%;border: 0"  ref="reference" @keyup="stopstab" @keydown="keydownHide" v-model="activeName"/>
-                </div>
-            </div>
+
+
 
         </su-popover>
      <!--   <div class="suSelectMenban" :style="{left:lefts+'px',top:tops+'px'}" v-show="su_select_menban_show" ref="suselectmenbanref">-->
@@ -71,6 +70,7 @@ export default {
         }
     },
     props:{
+        minWidth:0,
         searchType:{
             default:'input',
             type:String
@@ -78,6 +78,11 @@ export default {
         value:null
     },
     methods: {
+        clear_value(){
+            event.stopPropagation();
+            event.preventDefault();
+            this.set_active('','')
+        },
         set_hover_index_val(val){
           var indes=this.$children[0].$children.findIndex((arr)=>{
                  return arr.value==val
@@ -133,7 +138,9 @@ export default {
         set_active(val,label){
 
             //confirm 拦截
-            if(this.$parent.confirm({value:val,label:label})){return}
+            if(this.$parent.confirm({value:val,label:label})){
+                return
+            }
             this.$emit('onActive',{value:val,label:label});
             this.$emit('input',val);
 

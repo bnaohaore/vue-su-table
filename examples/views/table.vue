@@ -68,7 +68,7 @@
         <button @click="changesddshucai">修改下拉值</button>
         <button @click="sutableactive">单选第一行</button>
         <button @click="sutablecheckbox">多选第二行</button>
-
+        <button @click="sutablecheckbox33">跳转到{{row_edin}}行第三个</button>
         <div style="height: 500px;overflow: hidden;margin: 10px;">
             <su-table-sync ref="suTableSyncFef" :tableData.sync="su_tableData">
                 <template slot-scope="scope">
@@ -99,10 +99,12 @@
                                         :tableRef='$refs.menban1SuTableRef'
                                         :autoRef="$refs.menban1"
                                         @autoKeyup="autoKeyup"
+                                        @editValueChange='valuechangefn'
                                         :col="scope.$colIndex"
                                         :row="scope.$rowIndex"
                                         layer="auto"
-                                        v-model="scope.row.orderText" ></su-table-edit>
+                                        v-model="scope.row.orderText" >
+                                </su-table-edit>
                             </template>
                         </su-table-column>
                         <su-table-column >
@@ -134,7 +136,6 @@
                             <template slot-scope="scope">
                                 <su-table-edit
                                         @openEdit="openEdit"
-                                        @confirm="selectConfirm"
                                         @editValueChange="valuechangefn"
                                         :col="scope.$colIndex"
                                         :row="scope.$rowIndex"
@@ -152,9 +153,9 @@
                                 <su-table-edit
                                         @openEdit="openEdit"
                                         @confirm="selectSearchConfirm"
-                                        @editValueChange="valuechangefn"
                                         :col="scope.$colIndex" :row="scope.$rowIndex"
                                         layer="selectSearch"
+                                        :skip="true"
                                         @selectSearch="selectSearch_selectSearch"
                                         :dflabel.sync="scope.row.sucai2Str"
                                         select_label="label"
@@ -210,6 +211,7 @@
 
         data(){
             return {
+                row_edin:0,
                 su_menban_1:false,
                 actives:'1',
                 selectData:[
@@ -255,7 +257,7 @@
         //props:['su_tableData'],
         name: 'home',
         mounted(){
-            for(var lsd=0;lsd<1000;lsd++){
+            for(var lsd=0;lsd<10000;lsd++){
                   this.su_tableData.push({name:'莞',old:'213',index:lsd,sucai2:'57',sucai2Str:'57冰块4',sucai:'2',sucaiStr:'花菜',date:'2011-11-11',time:'15:10',orderText:'莞1'})
                 //  this.su_tableData.push({checked:true})
             }
@@ -285,7 +287,6 @@
             },
             //点击自定义弹窗内的表格将 点击行的 参数 赋值到 表格中 并且跳转到下一格
             menban1_rowclick(row){
-                console.log(this.$refs.suTableRef.isEditRef);
                 this.$refs.suTableSyncFef.setData(this.$refs.suTableRef.isEditRef.$copyIndex,{orderText:row.name});
                 this.$refs.suTableRef.isEditRef.showNextEdit();
             },
@@ -293,6 +294,10 @@
             sutableactive(){
                 this.$refs.suTableRef.set_activeindex(0);
                 //this.su_tableData[0].suActive=true
+            },
+            sutablecheckbox33(){
+                this.$refs.suTableSyncFef.showEdit(this.row_edin,2);  // 选中 第一行 第一个
+                this.row_edin++
             },
             //多选第二行
             sutablecheckbox(){
@@ -372,8 +377,10 @@
             },
             //搜索下拉 提交触发
             selectSearchConfirm(val,next){
+
                 //需要手动赋值
                 this.$refs.suTableSyncFef.setData(val.row,{sucai2:val.value,sucai2Str:val.label});
+                console.log(val);
                 //调用next 跳转到下一格
                 next()
             },

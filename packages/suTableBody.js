@@ -51,7 +51,7 @@
                                               <div class={'su_td_out'}><span>{ arrrow[arr.prop]  }</span></div>
                                           </td> : ''
                                  ) :
-                                 arr.fixed ? <td ><div class={'su_td_out'}></div></td> : arr.type=='checkbox' ? <td class={this.set_col_class(arr.prop,arrrow)}><div class={'su_td_out'}><su-checkbox  row={rowindex} types="column"  v-model={arrrow['suChecked']}></su-checkbox></div></td> : arr.$scopedSlots.hasOwnProperty('default') ? <td class={this.set_col_class(arr,arrrow)}><div class={'su_td_out'}>{ arr.$scopedSlots.default({row:arrrow,$rowIndex: rowindex,$colIndex:colindex}) }</div></td> : <td class={this.set_col_class(arr,arrrow)} title={ arrrow[arr.prop]}><div class={'su_td_out'}><span>{ arrrow[arr.prop]  }</span></div></td>
+                                 arr.fixed ? <td ><div class={'su_td_out'}></div></td> : arr.type=='checkbox' ? <td class={this.set_col_class(arr,arrrow)}><div class={'su_td_out'}><su-checkbox  row={rowindex} types="column"  v-model={arrrow['suChecked']}></su-checkbox></div></td> : arr.$scopedSlots.hasOwnProperty('default') ? <td class={this.set_col_class(arr,arrrow)}><div class={'su_td_out'}>{ arr.$scopedSlots.default({row:arrrow,$rowIndex: rowindex,$colIndex:colindex}) }</div></td> : <td class={this.set_col_class(arr,arrrow)} title={ arrrow[arr.prop]}><div class={'su_td_out'}><span>{ arrrow[arr.prop]  }</span></div></td>
                          })}
                          </tr>)
                         })

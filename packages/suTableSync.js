@@ -102,8 +102,12 @@ export default {
         },
         showEdit(row,col){
             if(row>this.tableData.length){return}
+            let topisdeng=false;
+            if(this.$refs.scrolland.scrollTop==(row*33)){
+                topisdeng=true;
+            }
             this.$refs.scrolland.scrollTop=(row*33);
-            if((33*this.tableData.length)==(this.$refs.scrolland.scrollTop+this.tableBody.clientHeight) || this.$refs.scrolland.scrollTop==0){
+            if((33*this.tableData.length)==(this.$refs.scrolland.scrollTop+this.tableBody.clientHeight) || this.$refs.scrolland.scrollTop==0 || topisdeng){
                 this.setTableData()
             }
             this.cbfn=()=>{
@@ -116,7 +120,6 @@ export default {
                       editref=null;
                     }
                 });
-
             };
 
         },

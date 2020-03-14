@@ -42,9 +42,8 @@ export default {
       this.unWatch=this.$watch("nowChecked",(val)=>{
             //  this.$parent.set_checked(this.row,val);
             this.$emit('input',val);
-            this.$emit('change',val)
+            this.$emit('change',val);
         });
-
     },
     beforeDestroy(){
         this.unWatch();

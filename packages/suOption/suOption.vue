@@ -39,7 +39,6 @@ export default {
             this.$parent.$parent.set_hover_index_val(this.value)
         },
         set_active(){
-
             this.$parent.$parent.set_active(this.value,this.label)
         },
     },

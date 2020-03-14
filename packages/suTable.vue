@@ -16,7 +16,7 @@
             <div class="su-table-out-bodys"   @scroll="setscroll" ref="bodyoutref" style="flex:1;overflow: auto;">
                 <su-table-body  ref='tablebody_ref'   :style="{width:bodyWidth+'px'}" @mousemove.native="bodymousemove"></su-table-body>
                 <div :style="{ width: bodyWidth+'px' }" style="height: 100%;display: flex;align-items: center;justify-content: center" v-if="!tableData || tableData.length === 0">
-                    <span class="el-table__empty-text">暂无数据</span>
+                    <span>暂无数据</span>
                 </div>
             </div>
             <div @mousewheel="fixed_set_body_scroll"  v-if="headerData[0].fixed"  :style="{ height:(bodyHeight-8)+'px',top:suHeaderHeight+'px',width:leftFixedWidth+'px'}" class="su-table-out-bodys-flexd-right" :class="{bodysleft0:bodyleft!=0}" style="height: 100%;overflow: hidden;">
@@ -311,10 +311,12 @@
                 if(type=='pre' && ins<0){
                     ins=this.tableData.length-1
                 }
+
                     this.$refs.bodyoutref.scrollTop=ins*33;
                     this.set_activeindex(ins)
             },
             setdefdata(data){
+                console.log(data);
                 let datas={...data};
                 this.myDefData.forEach((arr,index)=>{
                      delete datas[arr]
@@ -379,7 +381,6 @@
             },
             //body滚动触发
             setscroll(){
-
                this.$refs.tablebody_ref.$el.style.pointerEvents='none';
                 thottles_scroll.timeEnd(()=>{
                     this.$refs.tablebody_ref.$el.style.pointerEvents='auto';
@@ -430,6 +431,7 @@
             }
         },
         mounted(){
+
             this.showbody=true;
             if(this.$parent.$options.name=='suTableSync'){
                 this.sync=true
@@ -488,6 +490,7 @@
 </script>
 
 <style lang="scss">
+
     .su-popover {
         position: absolute;
         background: #fff;
@@ -523,13 +526,17 @@
             color: white !important;
         }
     }
+    .suSelectOut_out:hover{
+        .iconxx{
+            display: block!important;
+        }
+    }
     .suSelectOut{
         outline: none;
         text-align: center;
         display: flex;
         align-items: center;
         justify-content: center;
-        cursor: pointer;
         background: white;
         // border: 1px solid #dee9eb;
         //  border-radius: 4px;
@@ -626,6 +633,9 @@
                         line-height: 28px;
                         min-height: 28px;
                         width: 100%;
+                        overflow: hidden;
+                        white-space: nowrap;
+                        text-overflow: ellipsis;
                     }
                 }
 

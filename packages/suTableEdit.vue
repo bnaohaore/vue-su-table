@@ -1,23 +1,23 @@
 
 <template>
-    <div class="su-table-edit" :class="{focusClass:focusClass, inEdit_class:inEdit,disabled_class:disabled}" :title="showText()"  @dblclick="showEdit" >
+    <div class="su-table-edit" ref='su_table_edit_out_div' :class="{focusClass:focusClass, inEdit_class:inEdit,disabled_class:disabled}" :title="showText()"  @dblclick="showEdit" >
         <template v-if="!inEdit">
             {{layer=='input' || layer=='auto' ? value : layer=='select' || layer=='selectSearch' ? dflabel : ''}}
         </template>
         <template v-else>
             <template v-if="layer=='input'">
-                <input style="height: 28px;line-height: 28px;width: 100%"  :type="type"  @keydown="input_keydown"  @keyup="input_keyup" ref="editInput"  @blur="editInputBlur" v-model="inputValue" />
+                <input style="height: 27px;line-height: 27px;width: 100%"  :type="type"  @keydown="input_keydown"  @keyup="input_keyup" ref="editInput"  @blur="editInputBlur" v-model="inputValue" />
             </template>
             <template v-if="layer=='auto'">
-                <input style="height: 28px;line-height: 28px; width: 100%" @click.stop='' :type="type"  @keydown="auto_keydown"  @keyup="auto_keyup" ref="editAuto"  @blur="editAutoBlur" v-model="inputAutoValue" />
+                <input style="height: 27px;line-height: 27px; width: 100%" @click.stop='' :type="type"  @keydown="auto_keydown"  @keyup="auto_keyup" ref="editAuto"  @blur="editAutoBlur" v-model="inputAutoValue" />
             </template>
             <template v-if="layer=='select'">
-                <su-select style="height: 100%;width: 100%" ref="suselectref"   @keyup.native="select_keyup"  @empty_enter="tabFn"  @tab="tabFn"   @onActive="set_select" @close="hideEdit" v-model="selectValue">
+                <su-select :minWidth='$refs.su_table_edit_out_div.clientWidth' style="height: 100%;width: 100%" ref="suselectref"   @keyup.native="select_keyup"  @empty_enter="tabFn"  @tab="tabFn"   @onActive="set_select" @close="hideEdit" v-model="selectValue">
                     <su-option v-for="item,index in  selectData"  :key="index" :label="item[select_label]" :value="item[select_value]"></su-option>
                 </su-select>
             </template>
             <template v-if="layer=='selectSearch'">
-                <su-select @valueSearch="selectSearch_valueSearch" searchType="search" style="height: 100%;width: 100%" ref="suselectref"   @keyup.native="select_keyup"   @empty_enter="tabFn" @tab="tabFn"   @onActive="set_select" @close="hideEdit" v-model="selectValue">
+                <su-select :minWidth='$refs.su_table_edit_out_div.clientWidth' @valueSearch="selectSearch_valueSearch" searchType="search" style="height: 100%;width: 100%" ref="suselectref"   @keyup.native="select_keyup"   @empty_enter="tabFn" @tab="tabFn"   @onActive="set_select" @close="hideEdit" v-model="selectValue">
                     <su-option v-for="item,index in  selectData"  :key="item[select_value]" :label="item[select_label]" :value="item[select_value]"></su-option>
                 </su-select>
             </template>
@@ -26,12 +26,13 @@
 </template>
 <script>
 import thottles from './thottles'
-let thottles_inputValue=new thottles();
-let thottles_autoKeyCode=new thottles();
+
 export default {
     name:'suTableEdit',
     data(){
         return {
+            thottles_inputValue:new thottles(),
+            thottles_autoKeyCode:new thottles(),
             focusClass:false,
             $copyIndex:null,
             $copyRow:null,
@@ -62,6 +63,10 @@ export default {
         //自定义弹层
         autoRef:null,
         disabled:{
+            default: false,
+            type:Boolean
+        },
+        skip:{
             default: false,
             type:Boolean
         },
@@ -136,38 +141,40 @@ export default {
         },
         auto_keyup(){
 
-
-            if(event.keyCode===37 && event.ctrlKey ){
-                event.stopPropagation();
-                event.preventDefault();
-                this.showNextEdit('to_pre')
-            }
-
             if(this.tableRef && this.autoRef){
-
-
-                if(event.keyCode==40){
+                if(event.keyCode===40){
                     this.tableRef.change_activeindex('next')
+                    return
                 }
-                if(event.keyCode==38){
+                if(event.keyCode===38){
                     this.tableRef.change_activeindex('pre')
-                }
-            }
-            if(this.inEdit){
-                let codess=event.keyCode;
-                if(this.$listeners.hasOwnProperty('autoKeyup')){
-                    thottles_autoKeyCode.timeEnd(()=>{
-                        this.$emit('autoKeyup',{value:this.inputAutoValue, row:this.$parent.$parent.sync ? this.$parent.$parent.tableData[this.row]['$copyIndex'] : this.row,keyCode:codess},this.showNextEdit);
-                    },100);
                     return
                 }
             }
 
+            if(event.keyCode===37 && event.ctrlKey ){
+                event.stopPropagation();
+                event.preventDefault();
+                this.showNextEdit('to_pre');
+                return
+            }
             if(event.keyCode===9 || event.keyCode===13){
                 event.stopPropagation();
                 event.preventDefault();
-                this.showNextEdit()
+                this.showNextEdit();
+                return
             }
+
+            if(this.inEdit && event.keyCode!==9 && event.keyCode!==13){
+                let codess=event.keyCode;
+                if(this.$listeners.hasOwnProperty('autoKeyup')){
+                    this.thottles_autoKeyCode.timeEnd(()=>{
+                        this.$emit('autoKeyup',{value:this.inputAutoValue, row:this.$parent.$parent.sync ? this.$parent.$parent.tableData[this.row]['$copyIndex'] : this.row,keyCode:codess},this.showNextEdit);
+                    },200);
+                }
+            }
+
+
 
 
          /*   if(event.keyCode=='40'){
@@ -203,7 +210,12 @@ export default {
                let edit= this.$parent.$parent.getNextEdit(this.row,this.col,types);
 
                if(edit){
-                   edit.showEdit();
+                   if(edit.skip){
+                       edit.showNextEdit(types)
+                   }else {
+                       edit.showEdit();
+                   }
+
                    // edit=null;
                }else {
                   // this.hideEdit();
@@ -276,6 +288,7 @@ export default {
                     }
                 }
                 if(this.layer=='input'){
+
                 }
                 if(this.layer=='select'){
                 }
@@ -294,10 +307,13 @@ export default {
                 this.inEdit=false;
             },100)
         },*/
-        showEdit(){
+        showEdit(types='',next=''){
 
             if(this.disabled){return}
-
+           /* if(this.skip && next=='next'){
+                this.showNextEdit(types) ;
+                return
+            }*/
              this.inEdit=true;
              this.$copyIndex= this.$parent.$parent.tableData[this.row].$copyIndex  ;
 
@@ -326,6 +342,7 @@ export default {
               }
 
               if(this.layer=='auto'){
+                  this.tableRef.setscroll();
                   this.autoRef.showMenban(this.$el,this);
                   this.inputAutoValue=this.value;
                   this.$nextTick(()=>{
@@ -345,7 +362,6 @@ export default {
         set_focus_class(types=false){
             //设置当前行的可编辑td高亮
             let rowDatas= this.$parent.$parent.getRowEdit(this.row);
-            console.log(rowDatas)
             rowDatas.editArr.forEach((ars)=>{
 
                 if(types){
@@ -380,13 +396,13 @@ export default {
         },
         //select 外部赋值 反写label
 
-        //select 单选下拉赋值
+        //select 单选/多选下拉赋值
         set_select(data){
-
-            this.$emit('editValueChange',{label:data.label,value:this.selectValue,col:this.col,row:this.$parent.$parent.sync ? this.$parent.$parent.tableData[this.row]['$copyIndex'] : this.row});
             //data.value
-            this.$emit('input',data.value);
             this.$emit('update:dflabel',data.label);
+            this.$emit('input',data.value);
+            this.$emit('editValueChange',{label:data.label,value:data.value,col:this.col,row:this.$parent.$parent.sync ? this.$parent.$parent.tableData[this.row]['$copyIndex'] : this.row});
+
             //纯数据渲染模式需要映射到最外层
             if(this.$parent.$parent.sync){
                 this.$parent.$parent.$parent.setDataByRow(this.$parent.$parent.tableData[this.row].$copyIndex,this.$parent.$parent.tableData[this.row]);
@@ -410,16 +426,33 @@ export default {
         }
     },
     watch: {
-
         'value'(val){
             if(this.layer=='select' || this.layer=='selectSearch'){
                 this.selectValue=val
             }
         },
+        'inputAutoValue'(val){
+            if(this.inEdit){
+                this.thottles_inputValue.timeEnd(()=>{
+                    if(this.$listeners.hasOwnProperty('editValueChange')){
+                        this.$emit('editValueChange',{value:val,col:this.col,row:this.$parent.$parent.sync ? this.$parent.$parent.tableData[this.row]['$copyIndex'] : this.row})
+                    }
+                },200)
+            }
+        },
+        /*'selectValue'(val){
+            if(this.inEdit){
+                this.$emit('editValueChange',{label:this.dflabel,value:this.selectValue,col:this.col,row:this.$parent.$parent.sync ? this.$parent.$parent.tableData[this.row]['$copyIndex'] : this.row});
+            }
+        },*/
         'inputValue'(val){
-            thottles_inputValue.timeEnd(()=>{
-                this.$emit('editValueChange',{value:val,col:this.col,row:this.$parent.$parent.sync ? this.$parent.$parent.tableData[this.row]['$copyIndex'] : this.row})
-            },300)
+            if(this.inEdit){
+                this.thottles_inputValue.timeEnd(()=>{
+                    if(this.$listeners.hasOwnProperty('editValueChange')){
+                        this.$emit('editValueChange',{value:val,col:this.col,row:this.$parent.$parent.sync ? this.$parent.$parent.tableData[this.row]['$copyIndex'] : this.row})
+                    }
+                },200)
+            }
 
           // this.$emit('input',val);
         },
@@ -431,21 +464,23 @@ export default {
 
 </script>
 <style lang="scss" >
-    .inEdit_class{
-        border: 1px solid #cbdbe1;
-    }
+   
     .focusClass{
-        border: 1px solid #a6c7ff ;
+        border: 1px solid #a6c7ff;
         border-radius: 4px;
     }
     .su_active_tr .focusClass{
         border: 1px solid white ;
     }
+     .inEdit_class{
+        border: 0 !important;
+        border-radius:0 !important
+     }
     .su-select-out{
-        outline: none;
+        outline: none ;
     }
     .su-table-edit{
-        input{border: 0;outline:none;}
+        input{ border: 0;border-radius:4px;outline:none;box-shadow: 0px 0px 1px blue inset;}
         box-sizing: border-box;
         max-height: 28px;
         line-height: 28px;
@@ -457,7 +492,7 @@ export default {
     }
     .disabled_class{
        color: #8c939d;
-        border-color: #8c939d;
+        border-color: #dee9eb;
 
     }
 </style>

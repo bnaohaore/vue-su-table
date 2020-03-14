@@ -1,12 +1,12 @@
 <template>
-        <div @click.stop="">
+        <div @click.stop="" >
             <su-popover
                     v-model="su_menban_show"
                     :visible-arrow="false"
                     ref="su_menban"
             >
                     <div @click.stop=''  class="su-menbanout" :style="{width:width+'px',height:height+'px'}">
-                        <slot></slot>
+                        <slot ></slot>
                     </div>
             </su-popover>
         </div>
@@ -18,6 +18,7 @@
         name:'suTableMenban',
         data(){
             return {
+                keys:1,
                 edit:null,
                 su_menban_show:false
             }
@@ -48,6 +49,7 @@
                 if(this.su_menban_show){
                     this.su_menban_show=false
                 }
+
                 this.$refs.su_menban.referenceElm=el;
                 this.$nextTick(()=>{
                     this.$refs.su_menban.doDestroy();
@@ -60,7 +62,6 @@
                 if(this.edit){
                     this.edit.hideEdit();
                 }
-
             }
         },
 
