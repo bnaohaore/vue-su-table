@@ -50,7 +50,10 @@
                 haveCheckbox:false,
                 showHidePopover_cont:'',
                 showHidePopover:false,
-                isEditRef:null,
+                isEditRef:{
+                    $copyIndex:null,
+                    $el:null,
+                },
                 sync:false,
                 xx_data:{
                     left:0,
@@ -316,7 +319,6 @@
                     this.set_activeindex(ins)
             },
             setdefdata(data){
-                console.log(data);
                 let datas={...data};
                 this.myDefData.forEach((arr,index)=>{
                      delete datas[arr]
@@ -324,7 +326,7 @@
                 return  datas
             },
             get_active_row(){
-                return this.setdefdata(this.tableData[this.activeIndex])
+                return this.activeIndex ? this.setdefdata(this.tableData[this.activeIndex]) : ''
             },
             clear_activeindex(){
                 this.activeIndex='';

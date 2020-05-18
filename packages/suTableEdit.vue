@@ -2,22 +2,40 @@
 <template>
     <div class="su-table-edit" ref='su_table_edit_out_div' :class="{focusClass:focusClass, inEdit_class:inEdit,disabled_class:disabled}" :title="showText()"  @dblclick="showEdit" >
         <template v-if="!inEdit">
-            {{layer=='input' || layer=='auto' ? value : layer=='select' || layer=='selectSearch' ? dflabel : ''}}
+            {{layer=='date' || layer=='input' || layer=='auto' ? value : layer=='select' || layer=='selectSearch' ? dflabel : ''}}
         </template>
         <template v-else>
             <template v-if="layer=='input'">
-                <input style="height: 27px;line-height: 27px;width: 100%"  :type="type"  @keydown="input_keydown"  @keyup="input_keyup" ref="editInput"  @blur="editInputBlur" v-model="inputValue" />
+                <input style="height: 27px;line-height: 27px;width: 100%"  :type="type"    @keydown="input_keydown" ref="editInput"  @blur="editInputBlur" v-model="inputValue" />
+            </template>
+            <template v-if="layer=='date'">
+                <su-date-picker
+                        @visibleClose="visibleClose"
+                        @changeClick="set_date"
+                        clear-icon="clear_class"
+                        @keyup.native="date_keyup"
+                        @keydown.native="date_keydown"
+                        :clearable='true'
+                        style="height: 27px;line-height: 27px;width: 100%"
+                        ref="editSuDatePicker"
+                        v-model="dateValue"
+                        value-format='yyyy-MM-dd HH:mm:ss'
+                        format='yyyy-MM-dd HH:mm:ss'
+                        :type="type"
+                        :editable="true"
+                        placeholder="选择日期时间">
+                </su-date-picker>
             </template>
             <template v-if="layer=='auto'">
-                <input style="height: 27px;line-height: 27px; width: 100%" @click.stop='' :type="type"  @keydown="auto_keydown"  @keyup="auto_keyup" ref="editAuto"  @blur="editAutoBlur" v-model="inputAutoValue" />
+                <input style="height: 27px;line-height: 27px; width: 100%" @click.stop='' :type="type"    @keydown="auto_keydown" ref="editAuto"  @blur="editAutoBlur" v-model="inputAutoValue" />
             </template>
             <template v-if="layer=='select'">
-                <su-select :minWidth='$refs.su_table_edit_out_div.clientWidth' style="height: 100%;width: 100%" ref="suselectref"   @keyup.native="select_keyup"  @empty_enter="tabFn"  @tab="tabFn"   @onActive="set_select" @close="hideEdit" v-model="selectValue">
+                <su-select :minWidth='$refs.su_table_edit_out_div.clientWidth' style="height: 100%;width: 100%" ref="suselectref"   @keydown.native="select_keydown"  @empty_enter="tabFn"  @tab="tabFn"   @onActive="set_select" @close="hideEdit" v-model="selectValue">
                     <su-option v-for="item,index in  selectData"  :key="index" :label="item[select_label]" :value="item[select_value]"></su-option>
                 </su-select>
             </template>
             <template v-if="layer=='selectSearch'">
-                <su-select :minWidth='$refs.su_table_edit_out_div.clientWidth' @valueSearch="selectSearch_valueSearch" searchType="search" style="height: 100%;width: 100%" ref="suselectref"   @keyup.native="select_keyup"   @empty_enter="tabFn" @tab="tabFn"   @onActive="set_select" @close="hideEdit" v-model="selectValue">
+                <su-select :minWidth='$refs.su_table_edit_out_div.clientWidth' @valueSearch="selectSearch_valueSearch" searchType="search" style="height: 100%;width: 100%" ref="suselectref"   @keydown.native="select_keydown"   @empty_enter="tabFn" @tab="tabFn"   @onActive="set_select" @close="hideEdit" v-model="selectValue">
                     <su-option v-for="item,index in  selectData"  :key="item[select_value]" :label="item[select_label]" :value="item[select_value]"></su-option>
                 </su-select>
             </template>
@@ -33,12 +51,14 @@ export default {
         return {
             thottles_inputValue:new thottles(),
             thottles_autoKeyCode:new thottles(),
+            thottles_showEdit:new thottles(),
             focusClass:false,
             $copyIndex:null,
             $copyRow:null,
             rangindex:'',
             inEdit:false,
             inputAutoValue:'',
+            dateValue:'',
             inputValue:'',
             selectValue:'',
             selectText:'', //select 显示值
@@ -78,7 +98,6 @@ export default {
         select_value:'', //
         dflabel:'',
         type:'',
-
         //当前列
         col:null,
         //当前行
@@ -100,11 +119,43 @@ export default {
         }
     },
     methods: {
+        visibleClose(){
+            event.stopPropagation();
+            event.preventDefault();
+            if(event.keyCode==13){
+                this.set_date()
+            }
+
+           setTimeout(()=>{
+                if(this.inEdit){
+                    console.log(888)
+                    this.hideEdit();
+                }
+
+           },300)
+
+        },
         //可搜索下拉
         selectSearch_valueSearch(val,update){
             this.$emit('selectSearch',val,update)
         },
-        select_keyup(){
+        select_keydown(){
+            if(event.keyCode===37 && event.ctrlKey ){
+                event.stopPropagation();
+                event.preventDefault();
+                this.showNextEdit('to_pre')
+            }
+        },
+        date_keyup(){
+            event.stopPropagation();
+            event.preventDefault();
+        },
+        date_keydown(){
+            if(event.keyCode===9 ){
+                event.stopPropagation();
+                event.preventDefault();
+                this.showNextEdit()
+            }
             if(event.keyCode===37 && event.ctrlKey ){
                 event.stopPropagation();
                 event.preventDefault();
@@ -112,7 +163,7 @@ export default {
             }
         },
         //input 赋值
-        input_keyup(){
+        input_keydown(){
             if(event.keyCode==13){
                 if(this.confirm()){return}
                 this.$emit('input',this.inputValue);
@@ -133,21 +184,20 @@ export default {
                 this.showNextEdit('to_pre')
             }
         },
-        input_keydown(){
+       /* input_keydown(){
             if(event.keyCode===9){
                 event.stopPropagation();
                 event.preventDefault();
             }
-        },
-        auto_keyup(){
-
+        },*/
+        auto_keydown(){
             if(this.tableRef && this.autoRef){
                 if(event.keyCode===40){
-                    this.tableRef.change_activeindex('next')
+                    this.tableRef.change_activeindex('next');
                     return
                 }
                 if(event.keyCode===38){
-                    this.tableRef.change_activeindex('pre')
+                    this.tableRef.change_activeindex('pre');
                     return
                 }
             }
@@ -158,43 +208,27 @@ export default {
                 this.showNextEdit('to_pre');
                 return
             }
-            if(event.keyCode===9 || event.keyCode===13){
+            if(event.keyCode===9){
                 event.stopPropagation();
                 event.preventDefault();
                 this.showNextEdit();
                 return
             }
 
-            if(this.inEdit && event.keyCode!==9 && event.keyCode!==13){
+            if(this.inEdit){
                 let codess=event.keyCode;
                 if(this.$listeners.hasOwnProperty('autoKeyup')){
                     this.thottles_autoKeyCode.timeEnd(()=>{
-                        this.$emit('autoKeyup',{value:this.inputAutoValue, row:this.$parent.$parent.sync ? this.$parent.$parent.tableData[this.row]['$copyIndex'] : this.row,keyCode:codess},this.showNextEdit);
+                        this.$emit('autoKeyup',{activeData:this.tableRef ? this.tableRef.get_active_row() : {},  value:this.inputAutoValue,row:this.$parent.$parent.sync ? this.$parent.$parent.tableData[this.row]['$copyIndex'] : this.row,keyCode:codess},this.showNextEdit);
                     },200);
                 }
             }
 
-
-
-
-         /*   if(event.keyCode=='40'){
-                this.autoRef.change_activeindex('next')
-            }
-            if(event.keyCode=='38'){
-                this.autoRef.change_activeindex('pre')
-            }*/
-
-
-        },
-        auto_keydown(){
-
-            if(event.keyCode===9){
-                event.stopPropagation();
-                event.preventDefault();
-            }
         },
         //tab切换
         tabFn(){
+            event.stopPropagation();
+            event.preventDefault();
             if(event.keyCode==13 && this.layer=='select' || event.keyCode==13 && this.layer=='selectSearch'){
                 this.showNextEdit()
             }
@@ -242,9 +276,6 @@ export default {
                }
 
            });
-
-
-
         },
 /*        getNextEdit(row,col){
          let maxCol=this.$parent.$parent.headerData.length-1;
@@ -267,17 +298,19 @@ export default {
         },*/
         //title 显示的值
         showText(){
-            if(this.layer=='input'){
+            if(this.layer=='input' && this.layer=='date'){
                 return this.value
             }
         },
         editInputBlur(){
-            this.hideEdit()
+                this.hideEdit()
         },
         editAutoBlur(){
           //  this.inEdit=false;
         },
         hideEdit(){
+            console.log(44444)
+        console.log(this.$el)
            // if(!this.inEdit){return}
             return new Promise((success,err)=>{
                 this.inEdit=false;
@@ -292,8 +325,9 @@ export default {
                 }
                 if(this.layer=='select'){
                 }
-
-                this.$parent.$parent.setEdit(null);
+               /* if(this.$parent.$parent.isEditRef==this){
+                    this.$parent.$parent.setEdit(null);
+                }*/
                 this.$nextTick(()=>{
                     success(true)
                 })
@@ -308,56 +342,82 @@ export default {
             },100)
         },*/
         showEdit(types='',next=''){
+            if(this.disabled || this.inEdit){return}
+            this.thottles_showEdit.timeEnd(()=>{
 
-            if(this.disabled){return}
-           /* if(this.skip && next=='next'){
-                this.showNextEdit(types) ;
-                return
-            }*/
-             this.inEdit=true;
-             this.$copyIndex= this.$parent.$parent.tableData[this.row].$copyIndex  ;
+                this.inEdit=true;
+                console.log(this.inEdit);
+                this.$copyIndex= this.$parent.$parent.tableData[this.row].$copyIndex  ;
 
-             //回到当前编辑框位置
-              this.$nextTick(()=>{
-                  if(!this.$parent.isfixed){
-                     this.$parent.$parent.set_scroll_left(this.$el)
-                  }
-              });
-             //设置当前编辑对象
-              this.$parent.$parent.setEdit(this);
+                //回到当前编辑框位置
+                this.$nextTick(()=>{
+                    if(!this.$parent.isfixed){
+                        this.$parent.$parent.set_scroll_left(this.$el)
+                    }
+                });
+                //设置当前编辑对象常用数据到table组件
+                this.$parent.$parent.setEdit(this);
+                if(this.layer=='input' ){
+                    this.inputValue=this.value;
+                    this.$nextTick(()=>{
+                        this.$refs.editInput.focus();
+                    })
+                }
+                if(this.layer=='date'){
+                    this.dateValue=this.value;
 
-              if(this.layer=='input'){
-                  this.inputValue=this.value;
-                      this.$nextTick(()=>{
-                          this.$refs.editInput.focus();
-                      })
-              }
+                    this.$nextTick(()=>{
+                        /*     if(event.keyCode==9 || event.keyCode==13){
+                                 setTimeout(()=>{
+                                     this.showNextEdit()
+                                 },100);
+                             }
+                         //纯数据渲染模式需要映射到最外层
+                         this.$emit('input',this.dateValue);
+                         if(this.$parent.$parent.sync){
+                             this.$parent.$parent.$parent.setDataByRow(this.$parent.$parent.tableData[this.row].$copyIndex,this.$parent.$parent.tableData[this.row]);
+                         }
+                         this.hideEdit();
+                         console.log('关闭')*/
 
-              if(this.layer=='select' || this.layer=='selectSearch'){
-                  this.selectValue=this.value;
-                  this.$nextTick(()=>{
-                      this.$refs.suselectref.showMenban()
-                     // this.$refs.editSelect
-                  })
-              }
 
-              if(this.layer=='auto'){
-                  this.tableRef.setscroll();
-                  this.autoRef.showMenban(this.$el,this);
-                  this.inputAutoValue=this.value;
-                  this.$nextTick(()=>{
-                      this.$refs.editAuto.focus();
-                  })
 
-              }
+                        //   console.log(this.$refs.editSuDatePicker)
+                        let doms=this.$refs.editSuDatePicker.$el.querySelectorAll('.el-input__inner')[0];
+                        doms.focus();
+                        // 选中一段文字
+                        //    doms.select()
+
+                    })
+
+                }
+                if(this.layer=='select' || this.layer=='selectSearch'){
+                    this.selectValue=this.value;
+                    this.$nextTick(()=>{
+                        this.$refs.suselectref.showMenban()
+                        // this.$refs.editSelect
+                    })
+                }
+
+                if(this.layer=='auto'){
+                    this.tableRef ? this.tableRef.setscroll() : '';
+                    this.autoRef.showMenban(this.$el,this);
+                    this.inputAutoValue=this.value;
+                    this.$nextTick(()=>{
+                        this.$refs.editAuto.focus();
+                    })
+
+                }
 
                 //触发开启编辑钩子
-              if(this.$listeners.hasOwnProperty('openEdit')){
-                  this.$nextTick(()=>{
-                      this.$emit('openEdit',this.get_this_data())
-                  })
-              }
+                if(this.$listeners.hasOwnProperty('openEdit')){
+                    this.$nextTick(()=>{
+                        this.$emit('openEdit',this.get_this_data())
+                    })
+                }
                 this.set_focus_class(true)
+            },100)
+
         },
         set_focus_class(types=false){
             //设置当前行的可编辑td高亮
@@ -389,13 +449,29 @@ export default {
             let data={
                  row:this.$parent.$parent.sync ? this.$parent.$parent.tableData[this.row]['$copyIndex'] : this.row,
                  col:this.col,
-                 label: this.layer=='input' || this.layer=='auto' ? this.value : this.layer=='select' || this.layer=='selectSearch' ? this.dflabel : '',
-                 value:this.layer=='select' || this.layer=='selectSearch' ? this.selectValue : '',
+                 label:  (this.layer=='select' || this.layer=='selectSearch' ? this.dflabel : ''),
+                 value:(this.layer=='select' || this.layer=='selectSearch') ? this.selectValue : (this.layer=='date' ? this.dateValue : this.layer=='input' ? this.inputValue :  this.layer=='auto' ? this.inputAutoValue : ''),
             };
             return data
         },
         //select 外部赋值 反写label
+        //date 选择值的时候触发 赋值
+        set_date(date){
+            event.preventDefault();
+            event.stopPropagation();
+            if(this.confirm()){
 
+            }else {
+                this.$emit('input',this.dateValue);
+                //纯数据渲染模式需要映射到最外层
+                if(this.$parent.$parent.sync){
+                    this.$parent.$parent.$parent.setDataByRow(this.$parent.$parent.tableData[this.row].$copyIndex,this.$parent.$parent.tableData[this.row]);
+                }
+
+                this.showNextEdit();
+
+            }
+        },
         //select 单选/多选下拉赋值
         set_select(data){
             //data.value
@@ -415,7 +491,7 @@ export default {
                 var senddata={
                     row:this.$parent.$parent.sync ? this.$parent.$parent.tableData[this.row]['$copyIndex'] : this.row,
                     col:this.col,
-                    value:this.layer=='input' ? this.inputValue : this.layer=='select' || this.layer=='selectSearch' ? data.value : '',
+                    value:this.layer=='input'   ? this.inputValue : this.layer=='auto' ? this.inputAutoValue :  this.layer=='date' ? this.dateValue : (this.layer=='select' || this.layer=='selectSearch') ? data.value : '',
                     label:this.layer=='select' || this.layer=='selectSearch' ? data.label : ''
                 };
                 this.$emit('confirm',senddata,this.showNextEdit);
@@ -453,7 +529,6 @@ export default {
                     }
                 },200)
             }
-
           // this.$emit('input',val);
         },
     },
@@ -480,6 +555,27 @@ export default {
         outline: none ;
     }
     .su-table-edit{
+        .el-icon-circle-close:after {
+            content: 'x';
+            height: 100%;
+            width: 20px;
+            display: inline-block;
+            vertical-align: middle;
+            color: black;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .el-icon-circle-close:hover{cursor: pointer}
+
+        .el-date-editor{
+            .el-input__icon{
+                line-height: 27px;
+            }
+            .el-input__inner{
+                height: 100%;
+            }
+        }
+
         input{ border: 0;border-radius:4px;outline:none;box-shadow: 0px 0px 1px blue inset;}
         box-sizing: border-box;
         max-height: 28px;

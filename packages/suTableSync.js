@@ -172,10 +172,13 @@ export default {
         },
         //对应数据
         setTableData(){
+
             this.is_copy=true;
             thottles_set_tableData.timeEnd(()=>{
+                if(!this.$refs.scrolland){return}
+
                 let isedit=this.suTable.isEditRef;
-                if(isedit){
+                if(isedit && isedit.layer){
                     if(isedit.layer=='auto' && isedit.autoRef){
                         isedit.autoRef.hideMenban()
                     }else {

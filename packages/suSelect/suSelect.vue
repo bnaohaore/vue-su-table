@@ -13,7 +13,7 @@
             </div>
 
                 <div   slot="reference"  style="position: relative" class="suSelectOut_out" >
-                    <input @click.stop=""  ref="reference" @keyup="stopstab" @keydown="keydownHide" style="height: 28px;line-height:28px;width: 100%;border: 0" v-model="activeName" class="suSelectOut" >
+                    <input @click.stop=""  ref="reference" @keydown="stopstab" @keyup="keydownHide" style="height: 28px;line-height:28px;width: 100%;border: 0" v-model="activeName" class="suSelectOut" >
                     <!--<span class="biaoshi" style="display: inline-block" :class="{rotate180 : su_select_menban_show}">v</span>-->
                     <div @click="clear_value" class="iconxx" style="display: none; position: absolute;right: 0px;top: 6px;font-size: 12px;height: 16px;line-height:16px;width: 16px;background: #eef1f7;text-align: center;cursor: pointer;border-radius: 16px;">x</div>
                 </div>

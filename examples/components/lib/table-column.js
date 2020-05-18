@@ -321,7 +321,7 @@ exports.default = {
     prop: String,
     width: {},
     minWidth: {},
-    //renderHeader: Function,
+    renderHeader: Function,
     sortable: {
       type: [String, Boolean],
       default: false

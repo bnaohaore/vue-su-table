@@ -6,7 +6,7 @@ var _vue = require('vue');
 
 var _vue2 = _interopRequireDefault(_vue);
 
-var _dom = require('./dom');
+var _dom = require('element-ui/lib/utils/dom');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 

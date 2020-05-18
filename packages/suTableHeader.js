@@ -93,6 +93,9 @@
                     this.$parent.set_xx_type({show:false});
                     this.$parent.headerData[this.$parent.thTarget.getAttribute('data-col')].width=parseFloat(this.$parent.headerData[this.$parent.thTarget.getAttribute('data-col')].width+(this.$parent.xx_data.left-this.$parent.startdurgx));
                     this.$parent.set_durgData({key:'thTarget',value:null})
+                    this.$nextTick(()=>{
+                        this.$parent.set_init();
+                    });
                 }
             },
             get_su_header_th(val=''){
@@ -123,6 +126,7 @@
                 }
 
                 let zuobiao = this.$parent.thTarget.getBoundingClientRect();
+                if(!zuobiao.x){zuobiao.x=zuobiao.left}
                 if( (this.$parent.thTarget.offsetWidth+zuobiao.x)-8 < event.pageX){
                     let vals=this.$parent.durg_from=='fixed' ? this.$parent.thTarget.offsetWidth+this.$parent.thTarget.offsetLeft : this.$parent.thTarget.offsetWidth+this.$parent.thTarget.offsetLeft-this.$parent.bodyleft;
                     this.$parent.set_durgData({key:'startdurgx',value:vals});

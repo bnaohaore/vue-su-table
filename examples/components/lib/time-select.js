@@ -805,7 +805,7 @@ module.exports = require("element-ui/lib/utils/scroll-into-view");
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_picker_vue__ = __webpack_require__(27);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_picker_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_picker_vue__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_7ba0fce8_hasScoped_false_preserveWhitespace_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_picker_vue__ = __webpack_require__(29);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_2bf235cc_hasScoped_false_preserveWhitespace_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_picker_vue__ = __webpack_require__(29);
 var normalizeComponent = __webpack_require__(0)
 /* script */
 
@@ -821,7 +821,7 @@ var __vue_scopeId__ = null
 var __vue_module_identifier__ = null
 var Component = normalizeComponent(
   __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_picker_vue___default.a,
-  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_7ba0fce8_hasScoped_false_preserveWhitespace_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_picker_vue__["a" /* default */],
+  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_2bf235cc_hasScoped_false_preserveWhitespace_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_picker_vue__["a" /* default */],
   __vue_template_functional__,
   __vue_styles__,
   __vue_scopeId__,
@@ -873,6 +873,7 @@ var _merge2 = _interopRequireDefault(_merge);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+//
 //
 //
 //
@@ -1449,6 +1450,24 @@ exports.default = {
     handleBlur: function handleBlur() {
       this.$emit('blur', this);
     },
+    handleKeyup: function handleKeyup(event) {
+      var keyCode = event.keyCode;
+      // Enter
+      if (keyCode === 13 && this.displayValue) {
+        var value = this.parseString(this.displayValue);
+        if (this.isValidValue(value)) {
+          /**
+           * yjb
+           * 增加钩子
+           * */
+          // this.handleChange();
+          this.emitChangeClick(value);
+          this.handleChange();
+        }
+        event.stopPropagation();
+        return;
+      }
+    },
     handleKeydown: function handleKeydown(event) {
       var _this = this;
 
@@ -1484,11 +1503,6 @@ exports.default = {
       // Enter
       if (keyCode === 13 && this.displayValue) {
         var value = this.parseString(this.displayValue);
-        if (this.isValidValue(value)) {
-          this.handleChange();
-          this.pickerVisible = this.picker.visible = false;
-          this.blur();
-        }
         event.stopPropagation();
         return;
       }
@@ -1596,6 +1610,7 @@ exports.default = {
         tha.emitChange(tha.date_table_click_value);
       });
       this.picker.$on('date_table_click', function () {
+        console.log(666);
         tha.emitChangeClick(tha.date_table_click_value);
       });
       this.picker.$on('visible_close', function () {
@@ -1624,6 +1639,8 @@ exports.default = {
       }
     },
     emitChangeClick: function emitChangeClick(val) {
+      console.log(val);
+      console.log('emitChangeClick');
       this.$emit('changeClick', val);
       this.dispatch('ElFormItem', 'el.form.change', val);
       this.valueOnOpen = val;
@@ -1665,7 +1682,7 @@ module.exports = require("element-ui/lib/utils/date");
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return (!_vm.ranged)?_c('el-input',{directives:[{name:"clickoutside",rawName:"v-clickoutside",value:(_vm.handleClose),expression:"handleClose"}],ref:"reference",staticClass:"el-date-editor",class:'el-date-editor--' + _vm.type,attrs:{"readonly":!_vm.editable || _vm.readonly,"disabled":_vm.disabled,"size":_vm.pickerSize,"id":_vm.id,"name":_vm.name,"placeholder":_vm.placeholder,"value":_vm.displayValue,"validateEvent":false,"prefix-icon":_vm.triggerClass},on:{"focus":_vm.handleFocus,"blur":_vm.handleBlur,"input":function (value) { return _vm.userInput = value; }},nativeOn:{"keydown":function($event){_vm.handleKeydown($event)},"mouseenter":function($event){_vm.handleMouseEnter($event)},"mouseleave":function($event){_vm.showClose = false},"change":function($event){_vm.handleChange($event)}}},[(_vm.haveTrigger)?_c('i',{staticClass:"el-input__icon",class:{ 'el-icon-circle-close': _vm.showClose },attrs:{"slot":"suffix"},on:{"click":_vm.handleClickIcon},slot:"suffix"}):_vm._e()]):_c('div',{directives:[{name:"clickoutside",rawName:"v-clickoutside",value:(_vm.handleClose),expression:"handleClose"}],ref:"reference",staticClass:"el-date-editor el-range-editor el-input__inner",class:[
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return (!_vm.ranged)?_c('el-input',{directives:[{name:"clickoutside",rawName:"v-clickoutside",value:(_vm.handleClose),expression:"handleClose"}],ref:"reference",staticClass:"el-date-editor",class:'el-date-editor--' + _vm.type,attrs:{"readonly":!_vm.editable || _vm.readonly,"disabled":_vm.disabled,"size":_vm.pickerSize,"id":_vm.id,"name":_vm.name,"placeholder":_vm.placeholder,"value":_vm.displayValue,"validateEvent":false,"prefix-icon":_vm.triggerClass},on:{"focus":_vm.handleFocus,"blur":_vm.handleBlur,"input":function (value) { return _vm.userInput = value; }},nativeOn:{"keyup":function($event){_vm.handleKeyup($event)},"keydown":function($event){_vm.handleKeydown($event)},"mouseenter":function($event){_vm.handleMouseEnter($event)},"mouseleave":function($event){_vm.showClose = false},"change":function($event){_vm.handleChange($event)}}},[(_vm.haveTrigger)?_c('i',{staticClass:"el-input__icon",class:{ 'el-icon-circle-close': _vm.showClose },attrs:{"slot":"suffix"},on:{"click":_vm.handleClickIcon},slot:"suffix"}):_vm._e()]):_c('div',{directives:[{name:"clickoutside",rawName:"v-clickoutside",value:(_vm.handleClose),expression:"handleClose"}],ref:"reference",staticClass:"el-date-editor el-range-editor el-input__inner",class:[
     'el-date-editor--' + _vm.type,
     _vm.pickerSize ? ("el-range-editor--" + _vm.pickerSize) : '',
     _vm.disabled ? 'is-disabled' : '',

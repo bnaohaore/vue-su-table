@@ -64,7 +64,7 @@
                 return this.$parent.set_row_class(rowData)
             },
             set_col_class(colData,rowData){
-                return colData.align+' '+(this.$parent.set_col_class(colData.prop,rowData)||'')
+                return colData.align+' '+(this.$parent.set_col_class(colData,rowData) || '')
             },
             rowClick(row,index){
                 if(this.$parent.$listeners.hasOwnProperty('rowClick')){
