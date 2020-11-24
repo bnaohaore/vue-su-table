@@ -179,14 +179,14 @@ module.exports = function normalizeComponent (
 /***/ 1:
 /***/ (function(module, exports) {
 
-module.exports = require("element-ui/lib/mixins/emitter");
+module.exports = require("./element/mixins/emitter");
 
 /***/ }),
 
 /***/ 10:
 /***/ (function(module, exports) {
 
-module.exports = require("element-ui/lib/utils/merge");
+module.exports = require("./element/utils/merge");
 
 /***/ }),
 
@@ -456,35 +456,35 @@ var nextYear = exports.nextYear = function nextYear(date) {
 /***/ 13:
 /***/ (function(module, exports) {
 
-module.exports = require("element-ui/lib/mixins/focus");
+module.exports = require("./element/mixins/focus");
 
 /***/ }),
 
 /***/ 14:
 /***/ (function(module, exports) {
 
-module.exports = require("element-ui/lib/locale");
+module.exports = require("./element/locale");
 
 /***/ }),
 
 /***/ 15:
 /***/ (function(module, exports) {
 
-module.exports = require("element-ui/lib/button");
+module.exports = require("./element/button");
 
 /***/ }),
 
 /***/ 18:
 /***/ (function(module, exports) {
 
-module.exports = require("element-ui/lib/scrollbar");
+module.exports = require("./element/scrollbar");
 
 /***/ }),
 
 /***/ 2:
 /***/ (function(module, exports) {
 
-module.exports = require("element-ui/lib/utils/dom");
+module.exports = require("./element/utils/dom");
 
 /***/ }),
 
@@ -551,7 +551,7 @@ var getPanel = function getPanel(type) {
 exports.default = {
   mixins: [_picker2.default],
 
-  name: 'ElDatePicker',
+  name: 'suDatePicker',
 
   props: {
     type: {
@@ -3550,7 +3550,7 @@ exports.default = {
 /***/ 28:
 /***/ (function(module, exports) {
 
-module.exports = require("element-ui/lib/utils/date");
+module.exports = require("./element/utils/date");
 
 /***/ }),
 
@@ -3643,7 +3643,7 @@ var Component = normalizeComponent(
 /***/ 4:
 /***/ (function(module, exports) {
 
-module.exports = require("element-ui/lib/mixins/locale");
+module.exports = require("./element/mixins/locale");
 
 /***/ }),
 
@@ -4219,21 +4219,21 @@ module.exports = require("vue");
 /***/ 6:
 /***/ (function(module, exports) {
 
-module.exports = require("element-ui/lib/input");
+module.exports = require("./element/input");
 
 /***/ }),
 
 /***/ 8:
 /***/ (function(module, exports) {
 
-module.exports = require("element-ui/lib/utils/vue-popper");
+module.exports = require("./element/utils/vue-popper");
 
 /***/ }),
 
 /***/ 9:
 /***/ (function(module, exports) {
 
-module.exports = require("element-ui/lib/utils/clickoutside");
+module.exports = require("./element/utils/clickoutside");
 
 /***/ })
 

@@ -43,7 +43,7 @@
             //col宽度
             width:{
                 default: 160,
-                type:Number
+                type:[Number,String]
             },
             //字段名称
             prop:null,

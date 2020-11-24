@@ -76,7 +76,7 @@
                     }
 
                     this.$parent.set_activeindex(intdex);
-                    this.$parent.$emit('rowClick',this.$parent.setdefdata(row),index);
+                    this.$parent.$emit('rowClick',this.$parent.setdefdata(row),intdex);
                 }
             },
             rowDblclick(row,index){

@@ -179,7 +179,7 @@ module.exports = function normalizeComponent (
 /***/ 2:
 /***/ (function(module, exports) {
 
-module.exports = require("element-ui/lib/utils/dom");
+module.exports = require("../element/utils/dom");
 
 /***/ }),
 
@@ -505,7 +505,7 @@ exports.default = {
 /***/ 3:
 /***/ (function(module, exports) {
 
-module.exports = require("element-ui/lib/utils/util");
+module.exports = require("../element/utils/util");
 
 /***/ }),
 
@@ -519,7 +519,7 @@ module.exports = require("vue");
 /***/ 8:
 /***/ (function(module, exports) {
 
-module.exports = require("element-ui/lib/utils/vue-popper");
+module.exports = require("../element/utils/vue-popper");
 
 /***/ })
 

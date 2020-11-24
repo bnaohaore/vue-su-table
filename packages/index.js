@@ -10,9 +10,13 @@ import suOption  from './suOption';
 import suPopover   from  './suPopover'
 import suCheckbox   from  './suCheckbox.js'
 import suTableMenban   from  './suTableMenban.vue'
+import suElSelect  from './su-el-select';
 import  suDatePicker   from  './date-picker.js'
-
+import  suElOption   from  './su-el-option.js'
+import  suSelectSearchVal   from  './su-select-search-val.vue'
 import './date-picker.css'
+import './select.css'
+import './option.css'
 // 以数组的结构保存组件，便于遍历
 const components = [
     suPopover,
@@ -24,7 +28,10 @@ const components = [
     suSelect,
     suCheckbox,
     suTableMenban,
-    suDatePicker
+    suDatePicker,
+    suElSelect,
+    suElOption,
+    suSelectSearchVal
 ];
 // 定义 install 方法
 let install = function (Vue) {
@@ -55,7 +62,10 @@ let sutables={
         suTableSync,
         suSelect,
         suCheckbox,
-        suDatePicker
+        suDatePicker,
+        suElSelect,
+        suElOption,
+        suSelectSearchVal
 };
 window.vueSuTable=sutables;
 export default sutables;

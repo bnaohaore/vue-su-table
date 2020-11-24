@@ -179,14 +179,14 @@ module.exports = function normalizeComponent (
 /***/ 1:
 /***/ (function(module, exports) {
 
-module.exports = require("element-ui/lib/mixins/emitter");
+module.exports = require("./element/mixins/emitter");
 
 /***/ }),
 
 /***/ 10:
 /***/ (function(module, exports) {
 
-module.exports = require("element-ui/lib/utils/merge");
+module.exports = require("./element/utils/merge");
 
 /***/ }),
 
@@ -202,9 +202,13 @@ exports.nextYear = exports.prevYear = exports.nextMonth = exports.prevMonth = ex
 var _date = __webpack_require__(28);
 
 var _date2 = _interopRequireDefault(_date);
+
 var _locale = __webpack_require__(14);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+
+
 
 var weeks = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 var months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
@@ -255,6 +259,7 @@ var formatDate = exports.formatDate = function formatDate(date, format) {
 };
 
 var parseDate = exports.parseDate = function parseDate(string, format) {
+
   return _date2.default.parse(string, format || 'yyyy-MM-dd', getI18nSettings());
 };
 
@@ -455,35 +460,35 @@ var nextYear = exports.nextYear = function nextYear(date) {
 /***/ 13:
 /***/ (function(module, exports) {
 
-module.exports = require("element-ui/lib/mixins/focus");
+module.exports = require("./element/mixins/focus");
 
 /***/ }),
 
 /***/ 14:
 /***/ (function(module, exports) {
 
-module.exports = require("element-ui/lib/locale");
+module.exports = require("./element/locale");
 
 /***/ }),
 
 /***/ 15:
 /***/ (function(module, exports) {
 
-module.exports = require("element-ui/lib/button");
+module.exports = require("./element/button");
 
 /***/ }),
 
 /***/ 18:
 /***/ (function(module, exports) {
 
-module.exports = require("element-ui/lib/scrollbar");
+module.exports = require("./element/scrollbar");
 
 /***/ }),
 
 /***/ 2:
 /***/ (function(module, exports) {
 
-module.exports = require("element-ui/lib/utils/dom");
+module.exports = require("./element/utils/dom");
 
 /***/ }),
 
@@ -1004,19 +1009,15 @@ exports.default = {
       document.body.removeEventListener('keydown', this.handleKeydown);
     },
     handleKeydown: function handleKeydown(e) {
-
       var keyCode = e.keyCode;
       var list = [38, 40, 37, 39];
       if (this.visible && !this.timePickerVisible) {
-
         if (list.indexOf(keyCode) !== -1) {
-
           this.handleKeyControl(keyCode);
           event.stopPropagation();
           event.preventDefault();
         }
         if (keyCode === 13) {
-
           // Enter
           this.$emit('pick', this.date, false);
         }
@@ -2684,7 +2685,7 @@ exports.default = {
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_picker_vue__ = __webpack_require__(27);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_picker_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_picker_vue__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_2bf235cc_hasScoped_false_preserveWhitespace_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_picker_vue__ = __webpack_require__(29);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_9748fe96_hasScoped_false_preserveWhitespace_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_picker_vue__ = __webpack_require__(29);
 var normalizeComponent = __webpack_require__(0)
 /* script */
 
@@ -2700,7 +2701,7 @@ var __vue_scopeId__ = null
 var __vue_module_identifier__ = null
 var Component = normalizeComponent(
   __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_picker_vue___default.a,
-  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_2bf235cc_hasScoped_false_preserveWhitespace_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_picker_vue__["a" /* default */],
+  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_9748fe96_hasScoped_false_preserveWhitespace_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_picker_vue__["a" /* default */],
   __vue_template_functional__,
   __vue_styles__,
   __vue_scopeId__,
@@ -2983,10 +2984,8 @@ var parseAsFormatAndType = function parseAsFormatAndType(value, customFormat, ty
   var rangeSeparator = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : '-';
 
   if (!value) return null;
-  var parser =  TYPE_VALUE_RESOLVER_MAP[type ? type :'default'].parser;
-
+  var parser = TYPE_VALUE_RESOLVER_MAP[type ? type : 'default'].parser;
   var format = customFormat || DEFAULT_FORMATS[type];
-
   return parser(value, format, rangeSeparator);
 };
 
@@ -3259,7 +3258,7 @@ exports.default = {
         var _value = this.parseString(this.displayValue);
         this.emitChange(_value);
       } catch (err) {
-        console.log('date-picker报错');
+
       }
     },
     handleStartInput: function handleStartInput(event) {
@@ -3301,10 +3300,13 @@ exports.default = {
       }
     },
     handleClickIcon: function handleClickIcon(event) {
+
       if (this.readonly || this.disabled) return;
       if (this.showClose) {
         event.stopPropagation();
+
         this.emitInput(null);
+        this.emitChangeClick(null);
         // this.emitChange(null);
         this.showClose = false;
         if (this.picker && typeof this.picker.handleClear === 'function') {
@@ -3333,7 +3335,6 @@ exports.default = {
     },
     handleKeyup: function handleKeyup(event) {
       var keyCode = event.keyCode;
-
       // Enter
       if (keyCode === 13 && this.displayValue) {
         var value = this.parseString(this.displayValue);
@@ -3521,8 +3522,7 @@ exports.default = {
       }
     },
     emitChangeClick: function emitChangeClick(val) {
-      console.log(val);
-      console.log('emitChangeClick');
+
       this.$emit('changeClick', val);
       this.dispatch('ElFormItem', 'el.form.change', val);
       this.valueOnOpen = val;
@@ -3555,7 +3555,8 @@ exports.default = {
 
 /***/ 28:
 /***/ (function(module, exports) {
-module.exports = require("element-ui/lib/utils/date");
+
+module.exports = require("./element/utils/date");
 
 /***/ }),
 
@@ -3648,7 +3649,7 @@ var Component = normalizeComponent(
 /***/ 4:
 /***/ (function(module, exports) {
 
-module.exports = require("element-ui/lib/mixins/locale");
+module.exports = require("./element/mixins/locale");
 
 /***/ }),
 
@@ -3786,7 +3787,6 @@ exports.default = {
       this.$emit('pick', date, visible, first);
     },
     handleKeydown: function handleKeydown(event) {
-
       var keyCode = event.keyCode;
       var mapping = { 38: -1, 40: 1, 37: -1, 39: 1 };
 
@@ -4225,21 +4225,21 @@ module.exports = require("vue");
 /***/ 6:
 /***/ (function(module, exports) {
 
-module.exports = require("element-ui/lib/input");
+module.exports = require("./element/input");
 
 /***/ }),
 
 /***/ 8:
 /***/ (function(module, exports) {
 
-module.exports = require("element-ui/lib/utils/vue-popper");
+module.exports = require("./element/utils/vue-popper");
 
 /***/ }),
 
 /***/ 9:
 /***/ (function(module, exports) {
 
-module.exports = require("element-ui/lib/utils/clickoutside");
+module.exports = require("./element/utils/clickoutside");
 
 /***/ })
 

@@ -483,7 +483,7 @@ var sizeMap = {
 exports.default = {
   mixins: [_emitter2.default, _locale2.default, (0, _focus2.default)('reference'), _navigationMixin2.default],
 
-  name: 'ElSelect',
+  name: 'suElSelect',
 
   componentName: 'ElSelect',
 

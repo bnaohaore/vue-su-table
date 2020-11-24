@@ -91,7 +91,7 @@
                     document.body.style.cursor = '';
                     this.$parent.set_durgData({key:'durg_down',value:false});
                     this.$parent.set_xx_type({show:false});
-                    this.$parent.headerData[this.$parent.thTarget.getAttribute('data-col')].width=parseFloat(this.$parent.headerData[this.$parent.thTarget.getAttribute('data-col')].width+(this.$parent.xx_data.left-this.$parent.startdurgx));
+                    this.$parent.headerData[this.$parent.thTarget.getAttribute('data-col')].width=parseFloat(this.$parent.headerData[this.$parent.thTarget.getAttribute('data-col')].width)+parseFloat(this.$parent.xx_data.left-this.$parent.startdurgx);
                     this.$parent.set_durgData({key:'thTarget',value:null})
                     this.$nextTick(()=>{
                         this.$parent.set_init();

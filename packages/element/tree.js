@@ -938,7 +938,7 @@ var TreeStore = function () {
   };
 
   TreeStore.prototype.getCurrentNode = function getCurrentNode() {
-    console.log(this.currentNode);
+
     return this.currentNode;
   };
 

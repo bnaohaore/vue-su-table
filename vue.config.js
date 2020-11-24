@@ -13,17 +13,6 @@ module.exports = {
             }
         }
     },
-    configureWebpack: (config) => {
-
-        Object.assign(config, {
-            // 开发生产共同配置
-            resolve: {
-             /*   alias: {
-                    'element-ui': path.resolve(__dirname, './src/components'),
-                } // 别名配置*/
-            }
-        })
-    },
     filenameHashing:false,
     css:{extract:false},
    /* productionSourceMap:false,*/

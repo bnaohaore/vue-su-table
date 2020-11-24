@@ -1,12 +1,14 @@
 
 
 import thottles from './thottles'
-let thottles_set_tableData=new thottles();
-let thottles_refish=new thottles();
+/*let thottles_set_tableData=
+let thottles_refish=new thottles();*/
 export default {
     name:'suTableSync',
     data() {
         return {
+            thottles_set_tableData:new thottles(),
+            thottles_refish:new thottles(),
             suTable:null,
             shownext:false,
             flexBody:null,
@@ -22,27 +24,33 @@ export default {
         tableData: {
             type: Array,
             default: () => []
-        }
+        },
+        height :{
+            type: [String,Number],
+            default: () => ''
+        },
     },
+
     created(){
 
-        this.tableData.forEach((arr,index)=>{
-            if(!this.tableData[index].hasOwnProperty('suChecked')){
-                this.tableData[index].suChecked=false
-            }
-            if(!this.tableData[index].hasOwnProperty('suActive')){
-                this.tableData[index].suActive=false
-            }
-            this.tableData[index].$copyIndex=index
-        });
+            this.tableData.forEach((arr,index)=>{
+                this.tableData[index]['$copyIndex']=index;
+                if(!this.tableData[index].hasOwnProperty('suChecked')){
+                    this.tableData[index]['suChecked']=false
+                }
+                if(!this.tableData[index].hasOwnProperty('suActive')){
+                    this.tableData[index]['suActive']=false
+                }
+            });
+
     },
     /**/
     render(h,context){
         return  (
-            <div class={"su-table-sync-out"}>
+            <div class={"su-table-sync-out"}  style={this.setheight()}>
                 <div   style={{marginTop:this.mgt+'px',height:this.bdclientHeight+'px',boxSizing: 'border-box', position: 'absolute',top: 0,right:0,width: '10px',background: 'rgba(0,0,0,0)',zIndex: 998}} >
                     <div ref="scrolland" style="height: 100%;width: 100%;overflow-y: auto;">
-                        <div style={{'height':33*this.tableData.length+'px','width': '100%'}} ></div>
+                        <div style={{'height':(33*this.tableData.length)+'px','width': '100%'}} ></div>
                     </div>
                 </div>
                 { this.$scopedSlots.default({data:this.datas}) }
@@ -63,6 +71,8 @@ export default {
             this.$refs.scrolland.addEventListener('scroll',this.setTableData,false);
             window.addEventListener('resize',this.init,false);
             this.tableBody.addEventListener('mousewheel',this.set_bodyscroll,false);
+
+          //  console.log(this.suTable)
             this.init();
         });
        // this.datas.push(this.tableData[0])
@@ -81,16 +91,23 @@ export default {
 
     },
     methods: {
+        setheight(){
+            return this.height ? 'height:'+this.height+'px' : ''
+        },
         //反写外部参数
         setDataByRow(row,data){
             this.tableData.splice(row,1,{...this.tableData[row],...data});
         },
         //用于外部调用  写入内部 外部 参数
         setData(row,data){
-            this.tableData.splice(row,1,{...this.tableData[row],...data});
+            Object.keys(data).map(name=>{
+                this.tableData[row][name]=data[name]
+            });
+            //this.tableData.splice(row,1,{...this.tableData[row],...data});
             this.datas.forEach((arr,index)=>{
                 if(arr.$copyIndex==row){
-                    this.datas.splice(index,1,{...this.datas[index],...data});
+                   Object.keys(data).map(name=>{this.datas[index][name]=data[name]});
+                 // this.datas.splice(index,1,{...this.datas[index],...data});
                 }
             });
             /*if(data.hasOwnProperty('suChecked')){
@@ -107,21 +124,33 @@ export default {
                 topisdeng=true;
             }
             this.$refs.scrolland.scrollTop=(row*33);
-            if((33*this.tableData.length)==(this.$refs.scrolland.scrollTop+this.tableBody.clientHeight) || this.$refs.scrolland.scrollTop==0 || topisdeng){
-                this.setTableData()
-            }
-            this.cbfn=()=>{
+        /*    if((33*this.tableData.length)==(this.$refs.scrolland.scrollTop+this.tableBody.clientHeight) || this.$refs.scrolland.scrollTop==0 || topisdeng){*/
+                this.cbfn=()=>{
+                    this.datas.forEach((arr,index)=>{
+                        if(row==arr.$copyIndex){
+
+                            let editref=this.suTable.getNextEdit(index,col-1);
+                            if(editref){
+                                editref.showEdit()
+                            }
+                            editref=null;
+                        }
+                    });
+                };
+                this.setTableData();
+           /* }else {
+                console.log(this.suTable.getNextEdit(row,col-1))
                 this.datas.forEach((arr,index)=>{
                     if(row==arr.$copyIndex){
-                      let editref=this.suTable.getNextEdit(index,col);
-                      if(editref){
-                          editref.showEdit()
-                      }
-                      editref=null;
+                        let editref=this.suTable.getNextEdit(index,col-1);
+
+                        if(editref){
+                            editref.showEdit()
+                        }
+                        editref=null;
                     }
                 });
-            };
-
+            }*/
         },
         updateEndFn(){
             this.cbfn();
@@ -160,23 +189,44 @@ export default {
             if( event.wheelDelta<0){
                 fx=true;
             }
-            this.$refs.scrolland.scrollTop=(this.$refs.scrolland.scrollTop || 0) + (fx ? 33 : -33);
+            this.$refs.scrolland.scrollTop=(this.$refs.scrolland.scrollTop || 0) + (fx ? 66 : -66);
             this.setTableData()
         },
         //初始化
         init(){
-                this.mgt=this.suTable.$el.querySelectorAll('.su-table-out-header')[0].clientHeight;
-                this.bdclientHeight=this.suTable.$el.querySelector('.su-table-out-bodys').clientHeight;
+                this.mgt=this.suTable.$el.querySelectorAll('.su-table-out-header')[0].clientHeight || 28;
+                this.bdclientHeight=this.suTable.$el.querySelector('.su-table-out-bodys').clientHeight || (parseFloat(this.height)-38);
                 this.setTableData();
                 this.suTable.$el.querySelector('.su-table-out-bodys').scrollTop=0;
         },
+        //刷新
+        set_render(){
+            this.$nextTick(()=>{
+                this.is_copy=true;
+                this.tableData.forEach((arr,index)=>{
+                    if(!this.tableData[index].hasOwnProperty('suChecked')){
+                        this.tableData[index].suChecked=false
+                    }
+                    if(!this.tableData[index].hasOwnProperty('suActive')){
+                        this.tableData[index].suActive=false
+                    }
+                    this.tableData[index].$copyIndex=index
+                });
+                this.thottles_refish.timeEnd(()=>{
+                    if(this.suTable){
+                        this.suTable.initChecked();
+                        this.suTable.checkedChange()
+                    }
+                },100);
+                this.setTableData()
+            })
+        },
         //对应数据
         setTableData(){
-
             this.is_copy=true;
-            thottles_set_tableData.timeEnd(()=>{
-                if(!this.$refs.scrolland){return}
+            this.thottles_set_tableData.timeEnd(()=>{
 
+                if(!this.$refs.scrolland){return}
                 let isedit=this.suTable.isEditRef;
                 if(isedit && isedit.layer){
                     if(isedit.layer=='auto' && isedit.autoRef){
@@ -197,8 +247,7 @@ export default {
                 }
                 for(let nnp=0;nnp<=nums;nnp++){
                     let ins=parseFloat(start+nnp);
-                   /* console.log(ins);
-                    console.log(this.tableData[ins])*/
+
                     if(this.tableData[ins]){
                         if(!this.datas[nnp]){
                             this.datas.push({})
@@ -217,35 +266,13 @@ export default {
                     this.$emit('updateEnd');
                     this.is_copy=false;
                 });
-
             })
             },30)
         }
     },
     watch: {
         'tableData.length'(){
-
-                this.$nextTick(()=>{
-                    this.is_copy=true;
-                    this.tableData.forEach((arr,index)=>{
-                        if(!this.tableData[index].hasOwnProperty('suChecked')){
-                            this.tableData[index].suChecked=false
-                        }
-                        if(!this.tableData[index].hasOwnProperty('suActive')){
-                            this.tableData[index].suActive=false
-                        }
-                        this.tableData[index].$copyIndex=index
-                    });
-                    thottles_refish.timeEnd(()=>{
-                        if(this.suTable){
-                            this.suTable.initChecked();
-                            this.suTable.checkedChange()
-                        }
-                    },100);
-                    this.setTableData()
-                })
-
-           // this.datas.push(this.tableData[0])
+               this.set_render()
         },
    /*     datas: {
             handler(newName, oldName) {

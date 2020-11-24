@@ -512,8 +512,7 @@ export default {
     // {parse, formatTo} String deals with user input
     parseString(value) {
       const type = Array.isArray(value) ? this.type : this.type.replace('range', '');
-      console.log(type)
-        console.log(123)
+
       return parseAsFormatAndType(value, this.format, type);
     },
 
@@ -544,7 +543,7 @@ export default {
           const value = this.parseString(this.displayValue);
           this.emitChange(value)
       }catch (err){
-          console.log('date-picker报错')
+
       }
 
     },
@@ -631,8 +630,7 @@ export default {
         // Enter
         if (keyCode === 13 && this.displayValue) {
             const value = this.parseString(this.displayValue);
-            console.log(value);
-            console.log(this.isValidValue(value))
+
             if (this.isValidValue(value)) {
                 /**
                  * yjb
@@ -783,7 +781,7 @@ export default {
           tha.emitChange(tha.date_table_click_value);
       });
       this.picker.$on('date_table_click',function () {
-          console.log(666)
+
           tha.emitChangeClick(tha.date_table_click_value);
       });
         this.picker.$on('visible_close',function () {
@@ -813,8 +811,7 @@ export default {
       }
     },
     emitChangeClick(val){
-        console.log(val);
-        console.log('emitChangeClick');
+
         this.$emit('changeClick', val);
         this.dispatch('ElFormItem', 'el.form.change', val);
         this.valueOnOpen = val;

@@ -28,12 +28,12 @@
 </template>
 <script>
     import thottles from '../thottles'
-    let thottles_valueSrarch=new thottles();
-    let thottles_refish=new thottles();
+
 export default {
     name:'suSelect',
     data(){
         return {
+            thottles_valueSrarch:new thottles(),
             inpoppers:true,
             lefts:0,
             tops:0,
@@ -63,7 +63,6 @@ export default {
         }
         if(this.value && this.$parent.dflabel){
             this.activeName=this.$parent.dflabel;
-
         }
         if(!this.value){
             this.$emit('valueSearch','')
@@ -176,7 +175,7 @@ export default {
             if(this.searchType=='search'){
 
                     if(this.$refs.spopovers){
-                        thottles_valueSrarch.timeEnd(()=>{
+                        this.thottles_valueSrarch.timeEnd(()=>{
                             this.$emit('valueSearch',val)
                         },100)
                     }

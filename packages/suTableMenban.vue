@@ -1,12 +1,15 @@
 <template>
-        <div @click.stop="" >
+        <div @click.stop="">
             <su-popover
+                    transition="falsss"
+                    :offset="offset"
+                    :placement="placement"
                     v-model="su_menban_show"
                     :visible-arrow="false"
                     ref="su_menban"
             >
-                    <div @click.stop=''  class="su-menbanout" :style="{width:width+'px',height:height+'px'}">
-                        <slot ></slot>
+                    <div @click.stop=''  class="su-menbanout " :style="{width:width+'px',height:height+'px'}">
+                        <slot></slot>
                     </div>
             </su-popover>
         </div>
@@ -24,6 +27,12 @@
             }
         },
         props:{
+            offset:{
+                default:0
+            },
+            placement:{
+                default:'bottom'
+            },
             width:{
                 default:600
             },
@@ -57,10 +66,12 @@
                 });
 
             },
-            hideMenban(){
+            hideMenban(hed=true){
                 this.su_menban_show=false;
-                if(this.edit){
-                    this.edit.hideEdit();
+                if (hed){
+                    if(this.edit && this.edit.inEdit){
+                        this.edit.hideEdit();
+                    }
                 }
             }
         },
@@ -98,6 +109,9 @@
 
     }
     .su-menbanout{
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
         .su-table-out-bodys{
             td>span{height: 26px;display: inline-block;}
         }

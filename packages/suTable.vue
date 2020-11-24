@@ -6,10 +6,11 @@
         <div class="su-table-xx" :style="{left: xx_data.left+'px'}" v-show="xx_data.show"></div>
         <!--header-->
         <template v-if="showbody">
-            <div class="su-table-out-header" ref="suHeaderFef" style="display: flex;flex-direction: row;background: #eef1f7;color: #606266;" >
-                <su-table-header :style="{transform:'translateX('+-bodyleft+'px)',width:bodyWidth+'px'}" ref="headerOut" :headerData="headerData"></su-table-header><div style="height: 100%;background: #eef1f7;flex:1;"></div>
+            <div class="su-table-out-header" ref="suHeaderFef" style="background: #eef1f7;color: #606266;" >
+                <su-table-header :style="{transform:'translateX('+-bodyleft+'px)',width:bodyWidth+'px'}" ref="headerOut" :headerData="headerData"></su-table-header>
+               <!-- <div style="height: 100%;background: #eef1f7;flex:1;"></div>-->
             </div>
-            <div v-if="headerData[0].fixed" class="su-table-out-header-fixed-right" :class="{bodysleft1:bodyleft!=0}" :style="{width:leftFixedWidth+'px'}" style="display: flex;flex-direction: row;overflow: hidden">
+            <div v-if="headerData_cd[0].fixed" class="su-table-out-header-fixed-right" :class="{bodysleft1:bodyleft!=0}" :style="{width:leftFixedWidth+'px'}" style="overflow: hidden">
                 <su-table-header :isfixed="true" :style="{width:bodyWidth+'px'}" style="flex:1"  :headerData="headerData"></su-table-header><!--<div style="height: 100%;background: #cbdbe1;" :style="{width:scrollWidth+'px'}"></div>-->
             </div>
             <!--body-->
@@ -19,7 +20,7 @@
                     <span>暂无数据</span>
                 </div>
             </div>
-            <div @mousewheel="fixed_set_body_scroll"  v-if="headerData[0].fixed"  :style="{ height:(bodyHeight-8)+'px',top:suHeaderHeight+'px',width:leftFixedWidth+'px'}" class="su-table-out-bodys-flexd-right" :class="{bodysleft0:bodyleft!=0}" style="height: 100%;overflow: hidden;">
+            <div @mousewheel="fixed_set_body_scroll"  v-if="headerData_cd[0].fixed"  :style="{ height:(bodyHeight-10)+'px',top:suHeaderHeight+'px',width:leftFixedWidth+'px'}" class="su-table-out-bodys-flexd-right" :class="{bodysleft0:bodyleft!=0}" style="height: 100%;overflow: hidden;">
                 <su-table-body :isfixed="true" ref="tablebody_fixed_ref"  @mousemove.native="bodymousemove" :style="{transform:'translateY('+-bodytop+'px)',width:bodyWidth+'px'}"></su-table-body>
             </div>
         </template>
@@ -34,14 +35,17 @@
     import suTableHeader from './suTableHeader.js'
     import suTableBody from './suTableBody.js'
     import thottles from './thottles'
-    let thottles_scroll=new thottles();
-    let thottles_popover=new thottles();
-    let thottles_checked_init=new thottles();
-    let thottles_checked_change=new thottles();
     export default {
         name:'suTable',
         data() {
             return {
+                initIsFirst:true,
+                thottles_scroll:new thottles(),
+                thottles_popover:new thottles(),
+                thottles_checked_init:new thottles(),
+                thottles_checked_change:new thottles(),
+                thottles_init:new thottles(),
+                thottles_init2:new thottles(),
                 myDefData:['suChecked', 'suActive', '$copyIndex'],
                 initCheckedisld:true, //拦截
                 isIndeterminate:false,
@@ -78,6 +82,7 @@
             }
         },
         props:{
+            hoverItem:-1,
             colClass:'',
             rowClass:'',
             tableData:{
@@ -91,10 +96,13 @@
                 if(arr.type=='checkbox'){
                     this.haveCheckbox=true
                 }
-            }))
+            }));
+
+
         },
         beforeDestroy(){
             window.removeEventListener('resize',this.set_init);
+
             for(var sd in this.data){
                 this.data[sd]=null
             }
@@ -127,19 +135,25 @@
                 this.checkedChange()
             },
             set_checked(index,val){
+
+                let rowdata={};
               //  if(!this.initCheckedisld){return}
                 if(this.$parent.$options.name=='suTableSync'){
+                    rowdata=this.$parent.tableData[this.$parent.datas[index].$copyIndex];
                     this.$parent.tableData[this.$parent.datas[index].$copyIndex].suChecked=val;
                     this.initChecked();
                 }else {
+                    rowdata=this.tableData[index];
                     this.tableData[index].suChecked=val;
                     this.initChecked();
                 }
+                this.$emit('checkedClick',rowdata);
                 this.checkedChange()
             },
+            //多选触发
             checkedChange(){
-                this.checkedArr=this.get_checked();
-              //  this.$emit('checkedChange',this.get_checked())
+               // this.checkedArr=this.get_checked();
+                this.$emit('checkedChange',this.get_checked());
             },
             get_checked(){
                 let arrs=[];
@@ -161,7 +175,7 @@
             },
             //初始化表头checked
             initChecked(){
-                thottles_checked_init.timeEnd(()=>{
+                this.thottles_checked_init.timeEnd(()=>{
                     let have_select=false;
                     let have_noselect=false;
                     if(this.$parent.$options.name=='suTableSync'){
@@ -194,15 +208,15 @@
                     }
                 },100)
             },
-            showPopover(cont='',color='black'){
+            showPopover(cont='',color='black',outEditRef=null){
                 //自动关闭
-                thottles_popover.timeEnd(()=>{
+                this.thottles_popover.timeEnd(()=>{
                     this.showHidePopover=false
                 },3000);
                 if(this.showHidePopover){
                     this.showHidePopover=false
                 }
-                this.$refs.showHidePopover.referenceElm=this.isEditRef.$el;
+                this.$refs.showHidePopover.referenceElm=outEditRef || this.isEditRef.$el;
                 this.$nextTick(()=>{
                     this.showHidePopover_cont=cont;
                     this.$refs.su_popover_cont_ref.style.color=color;
@@ -217,7 +231,7 @@
             set_scroll_left(edit){
                 if(this.headerData[0].fixed){
                     setTimeout(()=>{
-                        let hidex= (this.leftFixedWidth+this.$refs.tableout.getBoundingClientRect().x)-edit.getBoundingClientRect().x;
+                        let hidex= (this.leftFixedWidth+this.$refs.tableout.getBoundingClientRect().left)-edit.getBoundingClientRect().left;
                         if(hidex>0){
                             this.$refs.bodyoutref.scrollLeft=this.$refs.bodyoutref.scrollLeft-hidex
                         }
@@ -246,12 +260,14 @@
                      rows=col == 0 ?  parseFloat(row-1) : row ;
                 }
 
+
                 let editfixed=null;
                 let edit=null;
                     edit=this.$refs.tablebody_ref.get_edit(rows,cols,types);
                 if(!edit){
                     editfixed=this.$refs.tablebody_fixed_ref ? this.$refs.tablebody_fixed_ref.get_edit(rows,cols,types) : null;
                 }
+
                 if(edit || editfixed){
                     return edit || editfixed
                 } else {
@@ -305,17 +321,18 @@
                 this.mousmoveindex=index
             },
             change_activeindex(type='next'){
-                let aind= typeof this.activeIndex =='number'  ? this.activeIndex : -1;
-                let ins=type=='next' ? parseFloat(aind+1) : parseFloat(aind-1);
 
-                if(type=='next' && ins==this.tableData.length){
-                    ins=0
-                }
-                if(type=='pre' && ins<0){
-                    ins=this.tableData.length-1
-                }
+                    let aind= typeof this.activeIndex =='number'  ? this.activeIndex : -1;
+                    let ins=type=='next' ? parseFloat(aind+1) : parseFloat(aind-1);
 
-                    this.$refs.bodyoutref.scrollTop=ins*33;
+                    if(type=='next' && ins==this.tableData.length){
+                        ins=0
+                    }
+                    if(type=='pre' && ins<0){
+                        ins=this.tableData.length-1
+                    }
+
+                this.$refs.bodyoutref ? this.$refs.bodyoutref.scrollTop=ins*33 : '';
                     this.set_activeindex(ins)
             },
             setdefdata(data){
@@ -326,7 +343,7 @@
                 return  datas
             },
             get_active_row(){
-                return this.activeIndex ? this.setdefdata(this.tableData[this.activeIndex]) : ''
+                return (this.activeIndex || parseFloat(this.activeIndex)>=0)&&this.tableData.length>0 ? this.setdefdata(this.tableData[this.activeIndex]) : ''
             },
             clear_activeindex(){
                 this.activeIndex='';
@@ -349,9 +366,9 @@
                 }
             },
             set_activeindex(index){
+
                 this.activeIndex=index;
                 if(this.$parent.$options.name!=='suTableSync' && this.tableData[index]){
-
                     this.tableData.forEach((arr,ind)=>{
                         if(ind!=index && arr.suActive){
                             this.tableData.splice(ind,1,{...this.tableData[ind],...{suActive:false}});
@@ -383,16 +400,18 @@
             },
             //body滚动触发
             setscroll(){
-               this.$refs.tablebody_ref.$el.style.pointerEvents='none';
-                thottles_scroll.timeEnd(()=>{
-                    this.$refs.tablebody_ref.$el.style.pointerEvents='auto';
+
+                if(!this.$refs.bodyoutref){return}
+               //this.$refs.tablebody_ref.$el.style.pointerEvents='none';
+                this.thottles_scroll.timeEnd(()=>{
+                  //  this.$refs.tablebody_ref.$el.style.pointerEvents='auto';
                     if((this.$refs.bodyoutref.clientHeight+this.$refs.bodyoutref.scrollTop)>=this.$refs.tablebody_ref.$el.offsetHeight){
                        this.$emit('tableBottom')
                     }
-                },100);
+                },200);
                 this.$nextTick(()=>{
-                        this.bodytop=this.$refs.bodyoutref.scrollTop;
-                        this.bodyleft=this.$refs.bodyoutref.scrollLeft;
+                    this.bodytop=this.$refs.bodyoutref.scrollTop;
+                    this.bodyleft=this.$refs.bodyoutref.scrollLeft;
                 });
               //  this.$refs.headerOut.$el.setAttribute('style','transform: translateX(-20px);-webkit-transform: translateX(-20px)')
             },
@@ -401,11 +420,15 @@
             },
             //设置初始化数据
            set_init(){
-                  // this.scrollWidth=(this.$refs.tableout.offsetWidth-this.$refs.bodyoutref.offsetWidth);
-                   this.bodyHeight=this.$refs.bodyoutref.offsetHeight;
-                   this.suHeaderHeight=this.$refs.suHeaderFef.offsetHeight;
-                   this.scrollWidth=(this.$refs.bodyoutref.offsetWidth-this.$refs.bodyoutref.clientWidth);
-                //   let slotcol=this.$scopedSlots.default();
+
+                    // this.scrollWidth=(this.$refs.tableout.offsetWidth-this.$refs.bodyoutref.offsetWidth);
+                    this.bodyHeight=this.$refs.bodyoutref.offsetHeight;
+                    this.suHeaderHeight=this.$refs.suHeaderFef.offsetHeight;
+                    this.scrollWidth=(this.$refs.bodyoutref.offsetWidth-this.$refs.bodyoutref.clientWidth);
+                    this.$parent.$options._componentTag=='su-table-sync'?  this.$parent.init() : '';
+                    //this.tableData.length>=0 ? this.set_activeindex(this.hoverItem) : ''
+                    //   let slotcol=this.$scopedSlots.default();
+
            },
             set_row_class(rowdata){
                 if(this.rowClass){
@@ -444,13 +467,16 @@
             });
         },
         computed:{
+            headerData_cd(){
+                return this.headerData
+            },
             //设置浮动表格宽度
             leftFixedWidth(){
                 let leftFixedWidth=0;
                 if(this.headerData[0].fixed){
                     for(let sdgf=0;sdgf<this.headerData.length;sdgf++){
                         if(this.headerData[sdgf].fixed){
-                            leftFixedWidth+=this.headerData[sdgf].width || 160
+                            leftFixedWidth+=parseFloat(this.headerData[sdgf].width) || 160
                         }else {
                             break;
                         }
@@ -461,27 +487,25 @@
             bodyWidth(){
                 let allwidth=0;
                 this.headerData.forEach((arr)=>{
-                    allwidth+=arr.width
+                    allwidth+=parseFloat(arr.width)
                 });
                 return  allwidth
             } //表格body宽度
         },
         watch: {
-            'checkedArr'(val,old){
-                thottles_checked_change.timeEnd(()=>{
+         /*   'checkedArr'(val,old){
+                this.thottles_checked_change.timeEnd(()=>{
                     if(JSON.stringify(val) != JSON.stringify(old)){
                         this.$emit('checkedChange',val);
                     }
-                    },100)
-
-            },
+                },100)
+            },*/
             'tableData.length'(){
                 if(!this.$parent.$options.name=='suTableSync'){
                     this.$nextTick(()=>{
                         this.initChecked();
                     });
                 }
-
             }
         },
         components: {
@@ -585,8 +609,8 @@
 
         .su-table-sync-out{
             ::-webkit-scrollbar{
-                width: 8px;
-                height: 8px;
+                width: 10px;
+                height: 10px;
             }
             ::-webkit-scrollbar-track-piece {
                 background-color: #eaeaea;
@@ -600,6 +624,7 @@
                 -webkit-border-radius: 5px;
                 border: 0px solid #fff;
             }
+            flex:1;
             position: relative;
             height: 100%;
             display: flex;
@@ -609,8 +634,8 @@
         }
         .su-table-out-edit-class{
             ::-webkit-scrollbar{
-                width: 8px;
-                height: 8px;
+                width: 10px;
+                height: 10px;
             }
             ::-webkit-scrollbar-track-piece {
                 background-color: #eaeaea;
@@ -646,6 +671,7 @@
         }
         .su-table-out{
             box-sizing: border-box;
+            flex:1;
             width:100%;
             height: 100%;
             overflow: hidden;
@@ -666,14 +692,13 @@
                // opacity: 0.5;
             }
             .su_active_tr{
-
-                background: #00c081 ;
-
+                background: rgba(0,192,129,0.9)  ;
+                color: white!important;
             }
             .su-table-out-header td,th , .su-table-out-header-fixed-right td,th{
-                background: #eef1f7;
+                background: #cbdbe1;
                 font-weight:bold;
-                border-top: 1px solid #ebeef5;
+                border-top: 1px solid #a6adb5;
             }
             .su-table-out-header-fixed-right{
                 position: absolute;
@@ -683,8 +708,8 @@
             table{
                  td,th {
                     box-sizing: border-box;
-                    border-bottom: 1px solid #ebeef5;
-                    border-right: 1px solid #ebeef5;
+                    border-bottom: 1px solid #a6adb5;
+                    border-right: 1px solid #a6adb5;
                 }
 
 
@@ -773,6 +798,68 @@
             .su_align_left{
                 text-align: left;
             }
+
+
+            /*suTableEdit*/
+            .focusClass{
+                border: 1px solid #a6c7ff;
+                border-radius: 4px;
+            }
+            .su_active_tr .focusClass{
+                border: 1px solid white ;
+            }
+            .inEdit_class{
+                border: 0 !important;
+                border-radius:0 !important
+            }
+            .su-select-out{
+                outline: none ;
+            }
+            .su-table-edit{
+                .el-input__suffix{right: 0};
+                >input,>div{box-sizing: border-box}
+                .el-input__inner{
+                    height: 28px !important;
+                }
+
+                .el-icon-circle-close:before {
+                    content: 'X';
+                    height: 100%;
+                    line-height: 2;
+                    width: 20px;
+                    display: inline-block;
+                    vertical-align: middle;
+                    color: darkgray;
+                    font-size: 14px;
+                    font-weight: bold;
+                }
+                .el-icon-circle-close:hover{cursor: pointer}
+
+                .el-date-editor{
+                    .el-input__icon{
+                        line-height: 27px;
+                    }
+                    .el-input__inner{
+                        height: 100%;
+                    }
+                }
+
+                input{ border: 0;border-radius:4px;outline:none;box-shadow: 0px 0px 1px blue inset;padding: 0 3px}
+                box-sizing: border-box;
+                max-height: 28px;
+                line-height: 28px;
+                overflow: hidden;
+                height: 28px;
+                /* height: 100%;*/
+                min-height: 28px;
+                width: 100%;
+            }
+            /*.disabled_class{
+               color: #8c939d;
+                border-color: #dee9eb;
+
+            }*/
+            /*suTableEdit*/
         }
 
 
